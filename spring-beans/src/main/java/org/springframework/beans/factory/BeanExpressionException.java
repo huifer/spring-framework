@@ -32,6 +32,7 @@ public class BeanExpressionException extends FatalBeanException {
 	 * @param msg the detail message
 	 */
 	public BeanExpressionException(String msg) {
+		// 中文测试
 		super(msg);
 	}
 

@@ -44,108 +44,108 @@ import static org.mockito.BDDMockito.*;
  */
 public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
-	private DefaultHandshakeHandler handshakeHandler;
+    private DefaultHandshakeHandler handshakeHandler;
 
-	@Mock
-	private RequestUpgradeStrategy upgradeStrategy;
-
-
-	@Before
-	public void setup() {
-		super.setup();
-
-		MockitoAnnotations.initMocks(this);
-		this.handshakeHandler = new DefaultHandshakeHandler(this.upgradeStrategy);
-	}
+    @Mock
+    private RequestUpgradeStrategy upgradeStrategy;
 
 
-	@Test
-	public void supportedSubProtocols() {
-		this.handshakeHandler.setSupportedProtocols("stomp", "mqtt");
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
+    @Before
+    public void setup() {
+        super.setup();
 
-		this.servletRequest.setMethod("GET");
-		initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("STOMP");
-
-		WebSocketHandler handler = new TextWebSocketHandler();
-		Map<String, Object> attributes = Collections.emptyMap();
-		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
-
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, "STOMP",
-				Collections.emptyList(), null, handler, attributes);
-	}
-
-	@Test
-	public void supportedExtensions() {
-		WebSocketExtension extension1 = new WebSocketExtension("ext1");
-		WebSocketExtension extension2 = new WebSocketExtension("ext2");
-
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
-		given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Collections.singletonList(extension1));
-
-		this.servletRequest.setMethod("GET");
-		initHeaders(this.request.getHeaders()).setSecWebSocketExtensions(Arrays.asList(extension1, extension2));
-
-		WebSocketHandler handler = new TextWebSocketHandler();
-		Map<String, Object> attributes = Collections.emptyMap();
-		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
-
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
-				Collections.singletonList(extension1), null, handler, attributes);
-	}
-
-	@Test
-	public void subProtocolCapableHandler() {
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
-
-		this.servletRequest.setMethod("GET");
-		initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("v11.stomp");
-
-		WebSocketHandler handler = new SubProtocolCapableHandler("v12.stomp", "v11.stomp");
-		Map<String, Object> attributes = Collections.emptyMap();
-		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
-
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, "v11.stomp",
-				Collections.emptyList(), null, handler, attributes);
-	}
-
-	@Test
-	public void subProtocolCapableHandlerNoMatch() {
-		given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[] {"13"});
-
-		this.servletRequest.setMethod("GET");
-		initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("v10.stomp");
-
-		WebSocketHandler handler = new SubProtocolCapableHandler("v12.stomp", "v11.stomp");
-		Map<String, Object> attributes = Collections.emptyMap();
-		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
-
-		verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
-				Collections.emptyList(), null, handler, attributes);
-	}
-
-	private WebSocketHttpHeaders initHeaders(HttpHeaders httpHeaders) {
-		WebSocketHttpHeaders headers = new WebSocketHttpHeaders(httpHeaders);
-		headers.setUpgrade("WebSocket");
-		headers.setConnection("Upgrade");
-		headers.setSecWebSocketVersion("13");
-		headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
-		return headers;
-	}
+        MockitoAnnotations.initMocks(this);
+        this.handshakeHandler = new DefaultHandshakeHandler(this.upgradeStrategy);
+    }
 
 
-	private static class SubProtocolCapableHandler extends TextWebSocketHandler implements SubProtocolCapable {
+    @Test
+    public void supportedSubProtocols() {
+        this.handshakeHandler.setSupportedProtocols("stomp", "mqtt");
+        given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
 
-		private final List<String> subProtocols;
+        this.servletRequest.setMethod("GET");
+        initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("STOMP");
 
-		public SubProtocolCapableHandler(String... subProtocols) {
-			this.subProtocols = Arrays.asList(subProtocols);
-		}
+        WebSocketHandler handler = new TextWebSocketHandler();
+        Map<String, Object> attributes = Collections.emptyMap();
+        this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		@Override
-		public List<String> getSubProtocols() {
-			return this.subProtocols;
-		}
-	}
+        verify(this.upgradeStrategy).upgrade(this.request, this.response, "STOMP",
+                Collections.emptyList(), null, handler, attributes);
+    }
+
+    @Test
+    public void supportedExtensions() {
+        WebSocketExtension extension1 = new WebSocketExtension("ext1");
+        WebSocketExtension extension2 = new WebSocketExtension("ext2");
+
+        given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
+        given(this.upgradeStrategy.getSupportedExtensions(this.request)).willReturn(Collections.singletonList(extension1));
+
+        this.servletRequest.setMethod("GET");
+        initHeaders(this.request.getHeaders()).setSecWebSocketExtensions(Arrays.asList(extension1, extension2));
+
+        WebSocketHandler handler = new TextWebSocketHandler();
+        Map<String, Object> attributes = Collections.emptyMap();
+        this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
+
+        verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
+                Collections.singletonList(extension1), null, handler, attributes);
+    }
+
+    @Test
+    public void subProtocolCapableHandler() {
+        given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
+
+        this.servletRequest.setMethod("GET");
+        initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("v11.stomp");
+
+        WebSocketHandler handler = new SubProtocolCapableHandler("v12.stomp", "v11.stomp");
+        Map<String, Object> attributes = Collections.emptyMap();
+        this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
+
+        verify(this.upgradeStrategy).upgrade(this.request, this.response, "v11.stomp",
+                Collections.emptyList(), null, handler, attributes);
+    }
+
+    @Test
+    public void subProtocolCapableHandlerNoMatch() {
+        given(this.upgradeStrategy.getSupportedVersions()).willReturn(new String[]{"13"});
+
+        this.servletRequest.setMethod("GET");
+        initHeaders(this.request.getHeaders()).setSecWebSocketProtocol("v10.stomp");
+
+        WebSocketHandler handler = new SubProtocolCapableHandler("v12.stomp", "v11.stomp");
+        Map<String, Object> attributes = Collections.emptyMap();
+        this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
+
+        verify(this.upgradeStrategy).upgrade(this.request, this.response, null,
+                Collections.emptyList(), null, handler, attributes);
+    }
+
+    private WebSocketHttpHeaders initHeaders(HttpHeaders httpHeaders) {
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders(httpHeaders);
+        headers.setUpgrade("WebSocket");
+        headers.setConnection("Upgrade");
+        headers.setSecWebSocketVersion("13");
+        headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
+        return headers;
+    }
+
+
+    private static class SubProtocolCapableHandler extends TextWebSocketHandler implements SubProtocolCapable {
+
+        private final List<String> subProtocols;
+
+        public SubProtocolCapableHandler(String... subProtocols) {
+            this.subProtocols = Arrays.asList(subProtocols);
+        }
+
+        @Override
+        public List<String> getSubProtocols() {
+            return this.subProtocols;
+        }
+    }
 
 }

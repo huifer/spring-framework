@@ -35,61 +35,62 @@ import static org.junit.Assert.*;
 public class BeanCreatingHandlerProviderTests {
 
 
-	@Test
-	public void getHandlerSimpleInstantiation() {
+    @Test
+    public void getHandlerSimpleInstantiation() {
 
-		BeanCreatingHandlerProvider<SimpleEchoHandler> provider =
-				new BeanCreatingHandlerProvider<>(SimpleEchoHandler.class);
+        BeanCreatingHandlerProvider<SimpleEchoHandler> provider =
+                new BeanCreatingHandlerProvider<>(SimpleEchoHandler.class);
 
-		assertNotNull(provider.getHandler());
-	}
+        assertNotNull(provider.getHandler());
+    }
 
-	@Test
-	public void getHandlerWithBeanFactory() {
+    @Test
+    public void getHandlerWithBeanFactory() {
 
-		@SuppressWarnings("resource")
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+        @SuppressWarnings("resource")
+        ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
-		BeanCreatingHandlerProvider<EchoHandler> provider =
-				new BeanCreatingHandlerProvider<>(EchoHandler.class);
-		provider.setBeanFactory(context.getBeanFactory());
+        BeanCreatingHandlerProvider<EchoHandler> provider =
+                new BeanCreatingHandlerProvider<>(EchoHandler.class);
+        provider.setBeanFactory(context.getBeanFactory());
 
-		assertNotNull(provider.getHandler());
-	}
+        assertNotNull(provider.getHandler());
+    }
 
-	@Test(expected = BeanInstantiationException.class)
-	public void getHandlerNoBeanFactory() {
+    @Test(expected = BeanInstantiationException.class)
+    public void getHandlerNoBeanFactory() {
 
-		BeanCreatingHandlerProvider<EchoHandler> provider =
-				new BeanCreatingHandlerProvider<>(EchoHandler.class);
+        BeanCreatingHandlerProvider<EchoHandler> provider =
+                new BeanCreatingHandlerProvider<>(EchoHandler.class);
 
-		provider.getHandler();
-	}
+        provider.getHandler();
+    }
 
 
-	@Configuration
-	static class Config {
+    @Configuration
+    static class Config {
 
-		@Bean
-		public EchoService echoService() {
-			return new EchoService();
-		}
-	}
+        @Bean
+        public EchoService echoService() {
+            return new EchoService();
+        }
+    }
 
-	public static class SimpleEchoHandler {
-	}
+    public static class SimpleEchoHandler {
+    }
 
-	private static class EchoHandler {
+    private static class EchoHandler {
 
-		@SuppressWarnings("unused")
-		private final EchoService service;
+        @SuppressWarnings("unused")
+        private final EchoService service;
 
-		@Autowired
-		public EchoHandler(EchoService service) {
-			this.service = service;
-		}
-	}
+        @Autowired
+        public EchoHandler(EchoService service) {
+            this.service = service;
+        }
+    }
 
-	private static class EchoService {	}
+    private static class EchoService {
+    }
 
 }

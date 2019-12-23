@@ -25,6 +25,10 @@ import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.junit.Assert.*;
 
+interface AnInterface {
+    public void interfaceMethod();
+}
+
 /**
  * Test for ensuring the aspects aren't advised. See SPR-3893 for more details.
  *
@@ -33,32 +37,26 @@ import static org.junit.Assert.*;
  */
 public class AspectImplementingInterfaceTests {
 
-	@Test
-	public void testProxyCreation() {
-		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+    @Test
+    public void testProxyCreation() {
+        ClassPathXmlApplicationContext ctx =
+                new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
-		ITestBean testBean = (ITestBean) ctx.getBean("testBean");
-		AnInterface interfaceExtendingAspect = (AnInterface) ctx.getBean("interfaceExtendingAspect");
+        ITestBean testBean = (ITestBean) ctx.getBean("testBean");
+        AnInterface interfaceExtendingAspect = (AnInterface) ctx.getBean("interfaceExtendingAspect");
 
-		assertTrue(testBean instanceof Advised);
-		assertFalse(interfaceExtendingAspect instanceof Advised);
-	}
+        assertTrue(testBean instanceof Advised);
+        assertFalse(interfaceExtendingAspect instanceof Advised);
+    }
 
 }
-
-
-interface AnInterface {
-	public void interfaceMethod();
-}
-
 
 class InterfaceExtendingAspect implements AnInterface {
-	public void increment(ProceedingJoinPoint pjp) throws Throwable {
-		pjp.proceed();
-	}
+    public void increment(ProceedingJoinPoint pjp) throws Throwable {
+        pjp.proceed();
+    }
 
-	@Override
-	public void interfaceMethod() {
-	}
+    @Override
+    public void interfaceMethod() {
+    }
 }

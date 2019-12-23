@@ -49,111 +49,102 @@ import static org.junit.Assert.*;
  */
 public class FreeMarkerViewTests {
 
-	private static final String TEMPLATE_PATH =
-			"classpath*:org/springframework/web/reactive/view/freemarker/";
+    private static final String TEMPLATE_PATH =
+            "classpath*:org/springframework/web/reactive/view/freemarker/";
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+    private final MockServerWebExchange exchange =
+            MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+    private GenericApplicationContext context;
+    private Configuration freeMarkerConfig;
 
+    private static String asString(DataBuffer dataBuffer) {
+        ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
+        final byte[] bytes = new byte[byteBuffer.remaining()];
+        byteBuffer.get(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
 
-	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+    @Before
+    public void setup() throws Exception {
+        this.context = new GenericApplicationContext();
+        this.context.refresh();
 
-	private GenericApplicationContext context;
+        FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+        configurer.setPreferFileSystemAccess(false);
+        configurer.setTemplateLoaderPath(TEMPLATE_PATH);
+        configurer.setResourceLoader(this.context);
+        this.freeMarkerConfig = configurer.createConfiguration();
+    }
 
-	private Configuration freeMarkerConfig;
+    @Test
+    public void noFreeMarkerConfig() throws Exception {
+        this.exception.expect(ApplicationContextException.class);
+        this.exception.expectMessage("Must define a single FreeMarkerConfig bean");
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+        FreeMarkerView view = new FreeMarkerView();
+        view.setApplicationContext(this.context);
+        view.setUrl("anythingButNull");
+        view.afterPropertiesSet();
+    }
 
+    @Test
+    public void noTemplateName() throws Exception {
+        this.exception.expect(IllegalArgumentException.class);
+        this.exception.expectMessage("Property 'url' is required");
 
-	@Before
-	public void setup() throws Exception {
-		this.context = new GenericApplicationContext();
-		this.context.refresh();
+        FreeMarkerView freeMarkerView = new FreeMarkerView();
+        freeMarkerView.afterPropertiesSet();
+    }
 
-		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.setPreferFileSystemAccess(false);
-		configurer.setTemplateLoaderPath(TEMPLATE_PATH);
-		configurer.setResourceLoader(this.context);
-		this.freeMarkerConfig = configurer.createConfiguration();
-	}
+    @Test
+    public void checkResourceExists() throws Exception {
+        FreeMarkerView view = new FreeMarkerView();
+        view.setConfiguration(this.freeMarkerConfig);
+        view.setUrl("test.ftl");
 
+        assertTrue(view.checkResourceExists(Locale.US));
+    }
 
-	@Test
-	public void noFreeMarkerConfig() throws Exception {
-		this.exception.expect(ApplicationContextException.class);
-		this.exception.expectMessage("Must define a single FreeMarkerConfig bean");
+    @Test
+    public void render() {
+        FreeMarkerView view = new FreeMarkerView();
+        view.setConfiguration(this.freeMarkerConfig);
+        view.setUrl("test.ftl");
 
-		FreeMarkerView view = new FreeMarkerView();
-		view.setApplicationContext(this.context);
-		view.setUrl("anythingButNull");
-		view.afterPropertiesSet();
-	}
+        ModelMap model = new ExtendedModelMap();
+        model.addAttribute("hello", "hi FreeMarker");
+        view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
-	@Test
-	public void noTemplateName() throws Exception {
-		this.exception.expect(IllegalArgumentException.class);
-		this.exception.expectMessage("Property 'url' is required");
+        StepVerifier.create(this.exchange.getResponse().getBody())
+                .consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))
+                .expectComplete()
+                .verify();
+    }
 
-		FreeMarkerView freeMarkerView = new FreeMarkerView();
-		freeMarkerView.afterPropertiesSet();
-	}
+    @Test // gh-22754
+    public void subscribeWithoutDemand() {
+        ZeroDemandResponse response = new ZeroDemandResponse();
+        ServerWebExchange exchange = new DefaultServerWebExchange(
+                MockServerHttpRequest.get("/path").build(), response,
+                new DefaultWebSessionManager(), ServerCodecConfigurer.create(),
+                new AcceptHeaderLocaleContextResolver());
 
-	@Test
-	public void checkResourceExists() throws Exception {
-		FreeMarkerView view = new FreeMarkerView();
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
+        FreeMarkerView view = new FreeMarkerView();
+        view.setConfiguration(this.freeMarkerConfig);
+        view.setUrl("test.ftl");
 
-		assertTrue(view.checkResourceExists(Locale.US));
-	}
+        ModelMap model = new ExtendedModelMap();
+        model.addAttribute("hello", "hi FreeMarker");
+        view.render(model, null, exchange).subscribe();
 
-	@Test
-	public void render() {
-		FreeMarkerView view = new FreeMarkerView();
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
+        response.cancelWrite();
+        response.checkForLeaks();
+    }
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("hello", "hi FreeMarker");
-		view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
-
-		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))
-				.expectComplete()
-				.verify();
-	}
-
-	@Test // gh-22754
-	public void subscribeWithoutDemand() {
-		ZeroDemandResponse response = new ZeroDemandResponse();
-		ServerWebExchange exchange = new DefaultServerWebExchange(
-				MockServerHttpRequest.get("/path").build(), response,
-				new DefaultWebSessionManager(), ServerCodecConfigurer.create(),
-				new AcceptHeaderLocaleContextResolver());
-
-		FreeMarkerView view = new FreeMarkerView();
-		view.setConfiguration(this.freeMarkerConfig);
-		view.setUrl("test.ftl");
-
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("hello", "hi FreeMarker");
-		view.render(model, null, exchange).subscribe();
-
-		response.cancelWrite();
-		response.checkForLeaks();
-	}
-
-
-	private static String asString(DataBuffer dataBuffer) {
-		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
-		final byte[] bytes = new byte[byteBuffer.remaining()];
-		byteBuffer.get(bytes);
-		return new String(bytes, StandardCharsets.UTF_8);
-	}
-
-
-	@SuppressWarnings("unused")
-	private String handle() {
-		return null;
-	}
+    @SuppressWarnings("unused")
+    private String handle() {
+        return null;
+    }
 
 }

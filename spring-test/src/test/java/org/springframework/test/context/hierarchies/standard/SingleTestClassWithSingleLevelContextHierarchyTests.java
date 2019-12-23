@@ -18,7 +18,6 @@ package org.springframework.test.context.hierarchies.standard;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -37,28 +36,25 @@ import static org.junit.Assert.*;
 @ContextHierarchy(@ContextConfiguration)
 public class SingleTestClassWithSingleLevelContextHierarchyTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    private String foo;
+    @Autowired
+    private ApplicationContext context;
 
-		@Bean
-		public String foo() {
-			return "foo";
-		}
-	}
+    @Test
+    public void loadContextHierarchy() {
+        assertNotNull("child ApplicationContext", context);
+        assertNull("parent ApplicationContext", context.getParent());
+        assertEquals("foo", foo);
+    }
 
+    @Configuration
+    static class Config {
 
-	@Autowired
-	private String foo;
-
-	@Autowired
-	private ApplicationContext context;
-
-
-	@Test
-	public void loadContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNull("parent ApplicationContext", context.getParent());
-		assertEquals("foo", foo);
-	}
+        @Bean
+        public String foo() {
+            return "foo";
+        }
+    }
 
 }

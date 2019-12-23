@@ -46,156 +46,156 @@ import static org.junit.Assert.*;
  */
 public class AnnotationBeanNameGeneratorTests {
 
-	private AnnotationBeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
+    private AnnotationBeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 
-	@Test
-	public void generateBeanNameWithNamedComponent() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithName.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertNotNull("The generated beanName must *never* be null.", beanName);
-		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
-		assertEquals("walden", beanName);
-	}
+    @Test
+    public void generateBeanNameWithNamedComponent() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithName.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertNotNull("The generated beanName must *never* be null.", beanName);
+        assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
+        assertEquals("walden", beanName);
+    }
 
-	@Test
-	public void generateBeanNameWithDefaultNamedComponent() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(DefaultNamedComponent.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertNotNull("The generated beanName must *never* be null.", beanName);
-		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
-		assertEquals("thoreau", beanName);
-	}
+    @Test
+    public void generateBeanNameWithDefaultNamedComponent() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(DefaultNamedComponent.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertNotNull("The generated beanName must *never* be null.", beanName);
+        assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
+        assertEquals("thoreau", beanName);
+    }
 
-	@Test
-	public void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithBlankName.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertNotNull("The generated beanName must *never* be null.", beanName);
-		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
-		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
-		assertEquals(expectedGeneratedBeanName, beanName);
-	}
+    @Test
+    public void generateBeanNameWithNamedComponentWhereTheNameIsBlank() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithBlankName.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertNotNull("The generated beanName must *never* be null.", beanName);
+        assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
+        String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+        assertEquals(expectedGeneratedBeanName, beanName);
+    }
 
-	@Test
-	public void generateBeanNameWithAnonymousComponentYieldsGeneratedBeanName() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnonymousComponent.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertNotNull("The generated beanName must *never* be null.", beanName);
-		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
-		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
-		assertEquals(expectedGeneratedBeanName, beanName);
-	}
+    @Test
+    public void generateBeanNameWithAnonymousComponentYieldsGeneratedBeanName() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnonymousComponent.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertNotNull("The generated beanName must *never* be null.", beanName);
+        assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
+        String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+        assertEquals(expectedGeneratedBeanName, beanName);
+    }
 
-	@Test
-	public void generateBeanNameFromMetaComponentWithStringValue() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromStringMeta.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertEquals("henry", beanName);
-	}
+    @Test
+    public void generateBeanNameFromMetaComponentWithStringValue() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromStringMeta.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertEquals("henry", beanName);
+    }
 
-	@Test
-	public void generateBeanNameFromMetaComponentWithNonStringValue() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromNonStringMeta.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertEquals("annotationBeanNameGeneratorTests.ComponentFromNonStringMeta", beanName);
-	}
+    @Test
+    public void generateBeanNameFromMetaComponentWithNonStringValue() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromNonStringMeta.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertEquals("annotationBeanNameGeneratorTests.ComponentFromNonStringMeta", beanName);
+    }
 
-	/**
-	 * @since 4.0.1
-	 * @see https://jira.spring.io/browse/SPR-11360
-	 */
-	@Test
-	public void generateBeanNameFromComposedControllerAnnotationWithoutName() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithoutName.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
-		assertEquals(expectedGeneratedBeanName, beanName);
-	}
+    /**
+     * @see https://jira.spring.io/browse/SPR-11360
+     * @since 4.0.1
+     */
+    @Test
+    public void generateBeanNameFromComposedControllerAnnotationWithoutName() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithoutName.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+        assertEquals(expectedGeneratedBeanName, beanName);
+    }
 
-	/**
-	 * @since 4.0.1
-	 * @see https://jira.spring.io/browse/SPR-11360
-	 */
-	@Test
-	public void generateBeanNameFromComposedControllerAnnotationWithBlankName() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithBlankName.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
-		assertEquals(expectedGeneratedBeanName, beanName);
-	}
+    /**
+     * @see https://jira.spring.io/browse/SPR-11360
+     * @since 4.0.1
+     */
+    @Test
+    public void generateBeanNameFromComposedControllerAnnotationWithBlankName() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComposedControllerAnnotationWithBlankName.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        String expectedGeneratedBeanName = this.beanNameGenerator.buildDefaultBeanName(bd);
+        assertEquals(expectedGeneratedBeanName, beanName);
+    }
 
-	/**
-	 * @since 4.0.1
-	 * @see https://jira.spring.io/browse/SPR-11360
-	 */
-	@Test
-	public void generateBeanNameFromComposedControllerAnnotationWithStringValue() {
-		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(
-			ComposedControllerAnnotationWithStringValue.class);
-		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
-		assertEquals("restController", beanName);
-	}
+    /**
+     * @see https://jira.spring.io/browse/SPR-11360
+     * @since 4.0.1
+     */
+    @Test
+    public void generateBeanNameFromComposedControllerAnnotationWithStringValue() {
+        BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+        AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(
+                ComposedControllerAnnotationWithStringValue.class);
+        String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+        assertEquals("restController", beanName);
+    }
 
 
-	@Component("walden")
-	private static class ComponentWithName {
-	}
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Component
+    public @interface NonStringMetaComponent {
 
-	@Component(" ")
-	private static class ComponentWithBlankName {
-	}
+        long value();
+    }
 
-	@Component
-	private static class AnonymousComponent {
-	}
+    /**
+     * @see org.springframework.web.bind.annotation.RestController
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Controller
+    public static @interface TestRestController {
 
-	@Service("henry")
-	private static class ComponentFromStringMeta {
-	}
+        String value() default "";
+    }
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	@Component
-	public @interface NonStringMetaComponent {
+    @Component("walden")
+    private static class ComponentWithName {
+    }
 
-		long value();
-	}
+    @Component(" ")
+    private static class ComponentWithBlankName {
+    }
 
-	@NonStringMetaComponent(123)
-	private static class ComponentFromNonStringMeta {
-	}
+    @Component
+    private static class AnonymousComponent {
+    }
 
-	/**
-	 * @see org.springframework.web.bind.annotation.RestController
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	@Controller
-	public static @interface TestRestController {
+    @Service("henry")
+    private static class ComponentFromStringMeta {
+    }
 
-		String value() default "";
-	}
+    @NonStringMetaComponent(123)
+    private static class ComponentFromNonStringMeta {
+    }
 
-	@TestRestController
-	public static class ComposedControllerAnnotationWithoutName {
-	}
+    @TestRestController
+    public static class ComposedControllerAnnotationWithoutName {
+    }
 
-	@TestRestController(" ")
-	public static class ComposedControllerAnnotationWithBlankName {
-	}
+    @TestRestController(" ")
+    public static class ComposedControllerAnnotationWithBlankName {
+    }
 
-	@TestRestController("restController")
-	public static class ComposedControllerAnnotationWithStringValue {
-	}
+    @TestRestController("restController")
+    public static class ComposedControllerAnnotationWithStringValue {
+    }
 
 }

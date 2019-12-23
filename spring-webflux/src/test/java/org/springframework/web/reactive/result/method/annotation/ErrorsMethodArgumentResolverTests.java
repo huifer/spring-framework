@@ -45,116 +45,110 @@ import static org.junit.Assert.*;
  */
 public class ErrorsMethodArgumentResolverTests {
 
-	private final ErrorsMethodArgumentResolver resolver =
-			new ErrorsMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
+    private final ErrorsMethodArgumentResolver resolver =
+            new ErrorsMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
+    private final BindingContext bindingContext = new BindingContext();
+    private final MockServerWebExchange exchange =
+            MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
+    private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
-	private final BindingContext bindingContext = new BindingContext();
+    @Test
+    public void supports() {
+        MethodParameter parameter = this.testMethod.arg(Errors.class);
+        assertTrue(this.resolver.supportsParameter(parameter));
 
-	private final MockServerWebExchange exchange =
-			MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
+        parameter = this.testMethod.arg(BindingResult.class);
+        assertTrue(this.resolver.supportsParameter(parameter));
 
-	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+        parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
+        assertTrue(this.resolver.supportsParameter(parameter));
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+        parameter = this.testMethod.arg(String.class);
+        assertFalse(this.resolver.supportsParameter(parameter));
+    }
 
+    @Test
+    public void resolve() {
+        BindingResult bindingResult = createBindingResult(new Foo(), "foo");
+        this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
 
-	@Test
-	public void supports() {
-		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		assertTrue(this.resolver.supportsParameter(parameter));
+        MethodParameter parameter = this.testMethod.arg(Errors.class);
+        Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+                .block(Duration.ofMillis(5000));
 
-		parameter = this.testMethod.arg(BindingResult.class);
-		assertTrue(this.resolver.supportsParameter(parameter));
+        assertSame(bindingResult, actual);
+    }
 
-		parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
-		assertTrue(this.resolver.supportsParameter(parameter));
+    private BindingResult createBindingResult(Foo target, String name) {
+        DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
+        return binder.getBindingResult();
+    }
 
-		parameter = this.testMethod.arg(String.class);
-		assertFalse(this.resolver.supportsParameter(parameter));
-	}
+    @Test
+    public void resolveWithMono() {
+        BindingResult bindingResult = createBindingResult(new Foo(), "foo");
+        MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
+        monoProcessor.onNext(bindingResult);
+        this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", monoProcessor);
 
-	@Test
-	public void resolve() {
-		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
-		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
+        MethodParameter parameter = this.testMethod.arg(Errors.class);
+        Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+                .block(Duration.ofMillis(5000));
 
-		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
+        assertSame(bindingResult, actual);
+    }
 
-		assertSame(bindingResult, actual);
-	}
+    @Test
+    public void resolveWithMonoOnBindingResultAndModelAttribute() {
+        this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult argument " +
+                "cannot both be declared with an async type wrapper.");
 
-	private BindingResult createBindingResult(Foo target, String name) {
-		DataBinder binder = this.bindingContext.createDataBinder(this.exchange, target, name);
-		return binder.getBindingResult();
-	}
+        MethodParameter parameter = this.testMethod.arg(BindingResult.class);
+        this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+                .block(Duration.ofMillis(5000));
+    }
 
-	@Test
-	public void resolveWithMono() {
-		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
-		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
-		monoProcessor.onNext(bindingResult);
-		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", monoProcessor);
+    @Test  // SPR-16187
+    public void resolveWithBindingResultNotFound() {
+        this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
+                "immediately after the @ModelAttribute argument");
 
-		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
+        MethodParameter parameter = this.testMethod.arg(Errors.class);
+        this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+                .block(Duration.ofMillis(5000));
+    }
 
-		assertSame(bindingResult, actual);
-	}
+    @SuppressWarnings("unused")
+    void handle(
+            @ModelAttribute Foo foo,
+            Errors errors,
+            @ModelAttribute Mono<Foo> fooMono,
+            BindingResult bindingResult,
+            Mono<Errors> errorsMono,
+            String string) {
+    }
 
-	@Test
-	public void resolveWithMonoOnBindingResultAndModelAttribute() {
-		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult argument " +
-				"cannot both be declared with an async type wrapper.");
+    @SuppressWarnings("unused")
+    private static class Foo {
 
-		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
-	}
+        private String name;
 
-	@Test  // SPR-16187
-	public void resolveWithBindingResultNotFound() {
-		this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
-				"immediately after the @ModelAttribute argument");
+        public Foo() {
+        }
 
-		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
-	}
+        public Foo(String name) {
+            this.name = name;
+        }
 
+        public String getName() {
+            return name;
+        }
 
-	@SuppressWarnings("unused")
-	private static class Foo {
-
-		private String name;
-
-		public Foo() {
-		}
-
-		public Foo(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	void handle(
-			@ModelAttribute Foo foo,
-			Errors errors,
-			@ModelAttribute Mono<Foo> fooMono,
-			BindingResult bindingResult,
-			Mono<Errors> errorsMono,
-			String string) {
-	}
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
 }

@@ -36,14 +36,14 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class TextWebSocketHandler extends AbstractWebSocketHandler {
 
-	@Override
-	protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-		try {
-			session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Binary messages not supported"));
-		}
-		catch (IOException ex) {
-			// ignore
-		}
-	}
+    @Override
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
+        try {
+            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Binary messages not supported"));
+        }
+        catch (IOException ex) {
+            // ignore
+        }
+    }
 
 }

@@ -47,133 +47,133 @@ import static org.junit.Assert.*;
  */
 public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTestCase {
 
-	private static final Duration DELAY = Duration.ofSeconds(5);
+    private static final Duration DELAY = Duration.ofSeconds(5);
 
 
-	private MockWebServer server;
+    private MockWebServer server;
 
-	private WebClient webClient;
+    private WebClient webClient;
 
-	private ReactorResourceFactory factory;
-
-
-	@Before
-	public void setUp() {
-
-		this.factory = new ReactorResourceFactory();
-		this.factory.afterPropertiesSet();
-
-		this.server = new MockWebServer();
-		this.webClient = WebClient
-				.builder()
-				.clientConnector(initConnector())
-				.baseUrl(this.server.url("/").toString())
-				.build();
-	}
-
-	private ReactorClientHttpConnector initConnector() {
-		if (bufferFactory instanceof NettyDataBufferFactory) {
-			ByteBufAllocator allocator = ((NettyDataBufferFactory) bufferFactory).getByteBufAllocator();
-			return new ReactorClientHttpConnector(this.factory, httpClient ->
-					httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
-		}
-		else {
-			return new ReactorClientHttpConnector();
-		}
-	}
-
-	@After
-	public void shutDown() throws InterruptedException {
-		waitForDataBufferRelease(Duration.ofSeconds(2));
-		this.factory.destroy();
-	}
+    private ReactorResourceFactory factory;
 
 
+    @Before
+    public void setUp() {
 
-	@Test
-	public void bodyToMonoVoid() {
+        this.factory = new ReactorResourceFactory();
+        this.factory.afterPropertiesSet();
 
-		this.server.enqueue(new MockResponse()
-				.setResponseCode(201)
-				.setHeader("Content-Type", "application/json")
-				.setChunkedBody("{\"foo\" : {\"bar\" : \"123\", \"baz\" : \"456\"}}", 5));
+        this.server = new MockWebServer();
+        this.webClient = WebClient
+                .builder()
+                .clientConnector(initConnector())
+                .baseUrl(this.server.url("/").toString())
+                .build();
+    }
 
-		Mono<Void> mono = this.webClient.get()
-				.uri("/json").accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.bodyToMono(Void.class);
+    private ReactorClientHttpConnector initConnector() {
+        if (bufferFactory instanceof NettyDataBufferFactory) {
+            ByteBufAllocator allocator = ((NettyDataBufferFactory) bufferFactory).getByteBufAllocator();
+            return new ReactorClientHttpConnector(this.factory, httpClient ->
+                    httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
+        }
+        else {
+            return new ReactorClientHttpConnector();
+        }
+    }
 
-		StepVerifier.create(mono).expectComplete().verify(Duration.ofSeconds(3));
-		assertEquals(1, this.server.getRequestCount());
-	}
-
-	@Test // SPR-17482
-	public void bodyToMonoVoidWithoutContentType() {
-
-		this.server.enqueue(new MockResponse()
-				.setResponseCode(HttpStatus.ACCEPTED.value())
-				.setChunkedBody("{\"foo\" : \"123\",  \"baz\" : \"456\", \"baz\" : \"456\"}", 5));
-
-		Mono<Map<String, String>> mono = this.webClient.get()
-				.uri("/sample").accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
-
-		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
-		assertEquals(1, this.server.getRequestCount());
-	}
-
-	@Test
-	public void onStatusWithBodyNotConsumed() {
-		RuntimeException ex = new RuntimeException("response error");
-		testOnStatus(ex, response -> Mono.just(ex));
-	}
-
-	@Test
-	public void onStatusWithBodyConsumed() {
-		RuntimeException ex = new RuntimeException("response error");
-		testOnStatus(ex, response -> response.bodyToMono(Void.class).thenReturn(ex));
-	}
-
-	@Test // SPR-17473
-	public void onStatusWithMonoErrorAndBodyNotConsumed() {
-		RuntimeException ex = new RuntimeException("response error");
-		testOnStatus(ex, response -> Mono.error(ex));
-	}
-
-	@Test
-	public void onStatusWithMonoErrorAndBodyConsumed() {
-		RuntimeException ex = new RuntimeException("response error");
-		testOnStatus(ex, response -> response.bodyToMono(Void.class).then(Mono.error(ex)));
-	}
-
-	@Test // gh-23230
-	public void onStatusWithImmediateErrorAndBodyNotConsumed() {
-		RuntimeException ex = new RuntimeException("response error");
-		testOnStatus(ex, response -> {
-			throw ex;
-		});
-	}
+    @After
+    public void shutDown() throws InterruptedException {
+        waitForDataBufferRelease(Duration.ofSeconds(2));
+        this.factory.destroy();
+    }
 
 
-	private void testOnStatus(Throwable expected,
-			Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+    @Test
+    public void bodyToMonoVoid() {
 
-		HttpStatus errorStatus = HttpStatus.BAD_GATEWAY;
+        this.server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setChunkedBody("{\"foo\" : {\"bar\" : \"123\", \"baz\" : \"456\"}}", 5));
 
-		this.server.enqueue(new MockResponse()
-				.setResponseCode(errorStatus.value())
-				.setHeader("Content-Type", "application/json")
-				.setChunkedBody("{\"error\" : {\"status\" : 502, \"message\" : \"Bad gateway.\"}}", 5));
+        Mono<Void> mono = this.webClient.get()
+                .uri("/json").accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
 
-		Mono<String> mono = this.webClient.get()
-				.uri("/json").accept(MediaType.APPLICATION_JSON)
-				.retrieve()
-				.onStatus(status -> status.equals(errorStatus), exceptionFunction)
-				.bodyToMono(String.class);
+        StepVerifier.create(mono).expectComplete().verify(Duration.ofSeconds(3));
+        assertEquals(1, this.server.getRequestCount());
+    }
 
-		StepVerifier.create(mono).expectErrorSatisfies(actual -> assertSame(expected, actual)).verify(DELAY);
-		assertEquals(1, this.server.getRequestCount());
-	}
+    @Test // SPR-17482
+    public void bodyToMonoVoidWithoutContentType() {
+
+        this.server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.ACCEPTED.value())
+                .setChunkedBody("{\"foo\" : \"123\",  \"baz\" : \"456\", \"baz\" : \"456\"}", 5));
+
+        Mono<Map<String, String>> mono = this.webClient.get()
+                .uri("/sample").accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
+                });
+
+        StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
+        assertEquals(1, this.server.getRequestCount());
+    }
+
+    @Test
+    public void onStatusWithBodyNotConsumed() {
+        RuntimeException ex = new RuntimeException("response error");
+        testOnStatus(ex, response -> Mono.just(ex));
+    }
+
+    @Test
+    public void onStatusWithBodyConsumed() {
+        RuntimeException ex = new RuntimeException("response error");
+        testOnStatus(ex, response -> response.bodyToMono(Void.class).thenReturn(ex));
+    }
+
+    @Test // SPR-17473
+    public void onStatusWithMonoErrorAndBodyNotConsumed() {
+        RuntimeException ex = new RuntimeException("response error");
+        testOnStatus(ex, response -> Mono.error(ex));
+    }
+
+    @Test
+    public void onStatusWithMonoErrorAndBodyConsumed() {
+        RuntimeException ex = new RuntimeException("response error");
+        testOnStatus(ex, response -> response.bodyToMono(Void.class).then(Mono.error(ex)));
+    }
+
+    @Test // gh-23230
+    public void onStatusWithImmediateErrorAndBodyNotConsumed() {
+        RuntimeException ex = new RuntimeException("response error");
+        testOnStatus(ex, response -> {
+            throw ex;
+        });
+    }
+
+
+    private void testOnStatus(Throwable expected,
+                              Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
+        HttpStatus errorStatus = HttpStatus.BAD_GATEWAY;
+
+        this.server.enqueue(new MockResponse()
+                .setResponseCode(errorStatus.value())
+                .setHeader("Content-Type", "application/json")
+                .setChunkedBody("{\"error\" : {\"status\" : 502, \"message\" : \"Bad gateway.\"}}", 5));
+
+        Mono<String> mono = this.webClient.get()
+                .uri("/json").accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status.equals(errorStatus), exceptionFunction)
+                .bodyToMono(String.class);
+
+        StepVerifier.create(mono).expectErrorSatisfies(actual -> assertSame(expected, actual)).verify(DELAY);
+        assertEquals(1, this.server.getRequestCount());
+    }
 
 }

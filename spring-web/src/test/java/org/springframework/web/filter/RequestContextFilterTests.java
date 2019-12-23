@@ -16,21 +16,19 @@
 
 package org.springframework.web.filter;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockFilterConfig;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -40,65 +38,66 @@ import static org.junit.Assert.*;
  */
 public class RequestContextFilterTests {
 
-	@Test
-	public void happyPath() throws Exception {
-		testFilterInvocation(null);
-	}
+    @Test
+    public void happyPath() throws Exception {
+        testFilterInvocation(null);
+    }
 
-	@Test
-	public void withException() throws Exception {
-		testFilterInvocation(new ServletException());
-	}
+    @Test
+    public void withException() throws Exception {
+        testFilterInvocation(new ServletException());
+    }
 
-	private void testFilterInvocation(final ServletException sex) throws Exception {
-		final MockHttpServletRequest req = new MockHttpServletRequest();
-		req.setAttribute("myAttr", "myValue");
-		final MockHttpServletResponse resp = new MockHttpServletResponse();
+    private void testFilterInvocation(final ServletException sex) throws Exception {
+        final MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setAttribute("myAttr", "myValue");
+        final MockHttpServletResponse resp = new MockHttpServletResponse();
 
-		// Expect one invocation by the filter being tested
-		class DummyFilterChain implements FilterChain {
-			public int invocations = 0;
-			@Override
-			public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
-				++invocations;
-				if (invocations == 1) {
-					assertSame("myValue",
-							RequestContextHolder.currentRequestAttributes().getAttribute("myAttr", RequestAttributes.SCOPE_REQUEST));
-					if (sex != null) {
-						throw sex;
-					}
-				}
-				else {
-					throw new IllegalStateException("Too many invocations");
-				}
-			}
-		}
+        // Expect one invocation by the filter being tested
+        class DummyFilterChain implements FilterChain {
+            public int invocations = 0;
 
-		DummyFilterChain fc = new DummyFilterChain();
-		MockFilterConfig mfc = new MockFilterConfig(new MockServletContext(), "foo");
+            @Override
+            public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
+                ++invocations;
+                if (invocations == 1) {
+                    assertSame("myValue",
+                            RequestContextHolder.currentRequestAttributes().getAttribute("myAttr", RequestAttributes.SCOPE_REQUEST));
+                    if (sex != null) {
+                        throw sex;
+                    }
+                }
+                else {
+                    throw new IllegalStateException("Too many invocations");
+                }
+            }
+        }
 
-		RequestContextFilter rbf = new RequestContextFilter();
-		rbf.init(mfc);
+        DummyFilterChain fc = new DummyFilterChain();
+        MockFilterConfig mfc = new MockFilterConfig(new MockServletContext(), "foo");
 
-		try {
-			rbf.doFilter(req, resp, fc);
-			if (sex != null) {
-				fail();
-			}
-		}
-		catch (ServletException ex) {
-			assertNotNull(sex);
-		}
+        RequestContextFilter rbf = new RequestContextFilter();
+        rbf.init(mfc);
 
-		try {
-			RequestContextHolder.currentRequestAttributes();
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+        try {
+            rbf.doFilter(req, resp, fc);
+            if (sex != null) {
+                fail();
+            }
+        }
+        catch (ServletException ex) {
+            assertNotNull(sex);
+        }
 
-		assertEquals(1, fc.invocations);
-	}
+        try {
+            RequestContextHolder.currentRequestAttributes();
+            fail();
+        }
+        catch (IllegalStateException ex) {
+            // Ok
+        }
+
+        assertEquals(1, fc.invocations);
+    }
 
 }

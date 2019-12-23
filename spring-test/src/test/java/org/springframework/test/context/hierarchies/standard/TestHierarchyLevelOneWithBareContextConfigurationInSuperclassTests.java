@@ -18,7 +18,6 @@ package org.springframework.test.context.hierarchies.standard;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,37 +35,33 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class TestHierarchyLevelOneWithBareContextConfigurationInSuperclassTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    private String foo;
+    @Autowired
+    private String bar;
+    @Autowired
+    private ApplicationContext context;
 
-		@Bean
-		public String foo() {
-			return "foo-level-1";
-		}
+    @Test
+    public void loadContextHierarchy() {
+        assertNotNull("child ApplicationContext", context);
+        assertNull("parent ApplicationContext", context.getParent());
+        assertEquals("foo-level-1", foo);
+        assertEquals("bar", bar);
+    }
 
-		@Bean
-		public String bar() {
-			return "bar";
-		}
-	}
+    @Configuration
+    static class Config {
 
+        @Bean
+        public String foo() {
+            return "foo-level-1";
+        }
 
-	@Autowired
-	private String foo;
-
-	@Autowired
-	private String bar;
-
-	@Autowired
-	private ApplicationContext context;
-
-
-	@Test
-	public void loadContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNull("parent ApplicationContext", context.getParent());
-		assertEquals("foo-level-1", foo);
-		assertEquals("bar", bar);
-	}
+        @Bean
+        public String bar() {
+            return "bar";
+        }
+    }
 
 }

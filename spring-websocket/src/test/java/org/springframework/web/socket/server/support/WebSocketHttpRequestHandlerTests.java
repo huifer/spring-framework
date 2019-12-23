@@ -44,99 +44,100 @@ import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link WebSocketHttpRequestHandler}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.1.9
  */
 public class WebSocketHttpRequestHandlerTests {
 
-	private HandshakeHandler handshakeHandler;
+    private HandshakeHandler handshakeHandler;
 
-	private WebSocketHttpRequestHandler requestHandler;
+    private WebSocketHttpRequestHandler requestHandler;
 
-	private MockHttpServletResponse response;
-
-
-	@Before
-	public void setUp() {
-		this.handshakeHandler = mock(HandshakeHandler.class);
-		this.requestHandler = new WebSocketHttpRequestHandler(mock(WebSocketHandler.class), this.handshakeHandler);
-		this.response = new MockHttpServletResponse();
-	}
+    private MockHttpServletResponse response;
 
 
-	@Test
-	public void success() throws ServletException, IOException {
-		TestInterceptor interceptor = new TestInterceptor(true);
-		this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
-		this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
-
-		verify(this.handshakeHandler).doHandshake(any(), any(), any(), any());
-		assertEquals("headerValue", this.response.getHeader("headerName"));
-	}
-
-	@Test
-	public void failure() throws ServletException, IOException {
-		TestInterceptor interceptor = new TestInterceptor(true);
-		this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
-
-		when(this.handshakeHandler.doHandshake(any(), any(), any(), any()))
-				.thenThrow(new IllegalStateException("bad state"));
-
-		try {
-			this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
-			fail();
-		}
-		catch (HandshakeFailureException ex) {
-			assertSame(ex, interceptor.getException());
-			assertEquals("headerValue", this.response.getHeader("headerName"));
-			assertEquals("exceptionHeaderValue", this.response.getHeader("exceptionHeaderName"));
-		}
-	}
-
-	@Test // gh-23179
-	public void handshakeNotAllowed() throws ServletException, IOException {
-		TestInterceptor interceptor = new TestInterceptor(false);
-		this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
-
-		this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
-
-		verifyNoMoreInteractions(this.handshakeHandler);
-		assertEquals("headerValue", this.response.getHeader("headerName"));
-	}
+    @Before
+    public void setUp() {
+        this.handshakeHandler = mock(HandshakeHandler.class);
+        this.requestHandler = new WebSocketHttpRequestHandler(mock(WebSocketHandler.class), this.handshakeHandler);
+        this.response = new MockHttpServletResponse();
+    }
 
 
-	private static class TestInterceptor implements HandshakeInterceptor {
+    @Test
+    public void success() throws ServletException, IOException {
+        TestInterceptor interceptor = new TestInterceptor(true);
+        this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
+        this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
 
-		private final boolean allowHandshake;
+        verify(this.handshakeHandler).doHandshake(any(), any(), any(), any());
+        assertEquals("headerValue", this.response.getHeader("headerName"));
+    }
 
-		private Exception exception;
+    @Test
+    public void failure() throws ServletException, IOException {
+        TestInterceptor interceptor = new TestInterceptor(true);
+        this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
+
+        when(this.handshakeHandler.doHandshake(any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException("bad state"));
+
+        try {
+            this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
+            fail();
+        }
+        catch (HandshakeFailureException ex) {
+            assertSame(ex, interceptor.getException());
+            assertEquals("headerValue", this.response.getHeader("headerName"));
+            assertEquals("exceptionHeaderValue", this.response.getHeader("exceptionHeaderName"));
+        }
+    }
+
+    @Test // gh-23179
+    public void handshakeNotAllowed() throws ServletException, IOException {
+        TestInterceptor interceptor = new TestInterceptor(false);
+        this.requestHandler.setHandshakeInterceptors(Collections.singletonList(interceptor));
+
+        this.requestHandler.handleRequest(new MockHttpServletRequest(), this.response);
+
+        verifyNoMoreInteractions(this.handshakeHandler);
+        assertEquals("headerValue", this.response.getHeader("headerName"));
+    }
 
 
-		private TestInterceptor(boolean allowHandshake) {
-			this.allowHandshake = allowHandshake;
-		}
+    private static class TestInterceptor implements HandshakeInterceptor {
+
+        private final boolean allowHandshake;
+
+        private Exception exception;
 
 
-		public Exception getException() {
-			return this.exception;
-		}
+        private TestInterceptor(boolean allowHandshake) {
+            this.allowHandshake = allowHandshake;
+        }
 
 
-		@Override
-		public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-				WebSocketHandler wsHandler, Map<String, Object> attributes) {
+        public Exception getException() {
+            return this.exception;
+        }
 
-			response.getHeaders().add("headerName", "headerValue");
-			return this.allowHandshake;
-		}
 
-		@Override
-		public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-				WebSocketHandler wsHandler, Exception exception) {
+        @Override
+        public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                       WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
-			response.getHeaders().add("exceptionHeaderName", "exceptionHeaderValue");
-			this.exception = exception;
-		}
-	}
+            response.getHeaders().add("headerName", "headerValue");
+            return this.allowHandshake;
+        }
+
+        @Override
+        public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                   WebSocketHandler wsHandler, Exception exception) {
+
+            response.getHeaders().add("exceptionHeaderName", "exceptionHeaderValue");
+            this.exception = exception;
+        }
+    }
 
 }

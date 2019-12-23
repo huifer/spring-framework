@@ -50,79 +50,79 @@ import static org.junit.Assert.*;
  */
 public class LocaleContextResolverIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
-	private final WebClient webClient = WebClient.create();
+    private final WebClient webClient = WebClient.create();
 
 
-	@Override
-	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(WebConfig.class);
-		context.refresh();
-		return context;
-	}
+    @Override
+    protected ApplicationContext initApplicationContext() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(WebConfig.class);
+        context.refresh();
+        return context;
+    }
 
-	@Test
-	public void fixedLocale() {
-		Mono<ClientResponse> result = webClient
-				.get()
-				.uri("http://localhost:" + this.port + "/")
-				.exchange();
+    @Test
+    public void fixedLocale() {
+        Mono<ClientResponse> result = webClient
+                .get()
+                .uri("http://localhost:" + this.port + "/")
+                .exchange();
 
-		StepVerifier.create(result)
-				.consumeNextWith(response -> {
-					assertEquals(HttpStatus.OK, response.statusCode());
-					assertEquals(Locale.GERMANY, response.headers().asHttpHeaders().getContentLanguage());
-				})
-				.verifyComplete();
-	}
-
-
-	@Configuration
-	@ComponentScan(resourcePattern = "**/LocaleContextResolverIntegrationTests*.class")
-	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebFluxConfigurationSupport {
-
-		@Override
-		protected LocaleContextResolver createLocaleContextResolver() {
-			return new FixedLocaleContextResolver(Locale.GERMANY);
-		}
-
-		@Override
-		protected void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.viewResolver((viewName, locale) -> Mono.just(new DummyView(locale)));
-		}
-
-		private static class DummyView implements View {
-
-			private final Locale locale;
-
-			public DummyView(Locale locale) {
-				this.locale = locale;
-			}
-
-			@Override
-			public List<MediaType> getSupportedMediaTypes() {
-				return Collections.singletonList(MediaType.TEXT_HTML);
-			}
-
-			@Override
-			public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
-					ServerWebExchange exchange) {
-				exchange.getResponse().getHeaders().setContentLanguage(locale);
-				return Mono.empty();
-			}
-		}
-	}
+        StepVerifier.create(result)
+                .consumeNextWith(response -> {
+                    assertEquals(HttpStatus.OK, response.statusCode());
+                    assertEquals(Locale.GERMANY, response.headers().asHttpHeaders().getContentLanguage());
+                })
+                .verifyComplete();
+    }
 
 
-	@Controller
-	@SuppressWarnings("unused")
-	static class TestController {
+    @Configuration
+    @ComponentScan(resourcePattern = "**/LocaleContextResolverIntegrationTests*.class")
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    static class WebConfig extends WebFluxConfigurationSupport {
 
-		@GetMapping("/")
-		public String foo() {
-			return "foo";
-		}
-	}
+        @Override
+        protected LocaleContextResolver createLocaleContextResolver() {
+            return new FixedLocaleContextResolver(Locale.GERMANY);
+        }
+
+        @Override
+        protected void configureViewResolvers(ViewResolverRegistry registry) {
+            registry.viewResolver((viewName, locale) -> Mono.just(new DummyView(locale)));
+        }
+
+        private static class DummyView implements View {
+
+            private final Locale locale;
+
+            public DummyView(Locale locale) {
+                this.locale = locale;
+            }
+
+            @Override
+            public List<MediaType> getSupportedMediaTypes() {
+                return Collections.singletonList(MediaType.TEXT_HTML);
+            }
+
+            @Override
+            public Mono<Void> render(@Nullable Map<String, ?> model, @Nullable MediaType contentType,
+                                     ServerWebExchange exchange) {
+                exchange.getResponse().getHeaders().setContentLanguage(locale);
+                return Mono.empty();
+            }
+        }
+    }
+
+
+    @Controller
+    @SuppressWarnings("unused")
+    static class TestController {
+
+        @GetMapping("/")
+        public String foo() {
+            return "foo";
+        }
+    }
 
 }

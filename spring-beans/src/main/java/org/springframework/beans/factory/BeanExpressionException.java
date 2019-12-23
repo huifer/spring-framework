@@ -27,23 +27,25 @@ import org.springframework.beans.FatalBeanException;
 @SuppressWarnings("serial")
 public class BeanExpressionException extends FatalBeanException {
 
-	/**
-	 * Create a new BeanExpressionException with the specified message.
-	 * @param msg the detail message
-	 */
-	public BeanExpressionException(String msg) {
-		// 中文测试
-		super(msg);
-	}
+    /**
+     * Create a new BeanExpressionException with the specified message.
+     *
+     * @param msg the detail message
+     */
+    public BeanExpressionException(String msg) {
+        // 中文测试
+        super(msg);
+    }
 
-	/**
-	 * Create a new BeanExpressionException with the specified message
-	 * and root cause.
-	 * @param msg the detail message
-	 * @param cause the root cause
-	 */
-	public BeanExpressionException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Create a new BeanExpressionException with the specified message
+     * and root cause.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause
+     */
+    public BeanExpressionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

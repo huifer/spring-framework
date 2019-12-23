@@ -33,174 +33,172 @@ import static org.junit.Assert.*;
  */
 public class RequestPredicateAttributesTests {
 
-	private DefaultServerRequest request;
+    private DefaultServerRequest request;
 
-	@Before
-	public void createRequest() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com/path").build();
-		MockServerWebExchange webExchange = MockServerWebExchange.from(request);
-		webExchange.getAttributes().put("exchange", "bar");
+    @Before
+    public void createRequest() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com/path").build();
+        MockServerWebExchange webExchange = MockServerWebExchange.from(request);
+        webExchange.getAttributes().put("exchange", "bar");
 
-		this.request = new DefaultServerRequest(webExchange,
-				Collections.singletonList(
-						new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes())));
-	}
-
-
-	@Test
-	public void negateSucceed() {
-		RequestPredicate predicate = new AddAttributePredicate(false, "predicate", "baz").negate();
-
-		boolean result = predicate.test(this.request);
-		assertTrue(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertEquals("baz", this.request.attributes().get("predicate"));
-	}
-
-	@Test
-	public void negateFail() {
-		RequestPredicate predicate = new AddAttributePredicate(true, "predicate", "baz").negate();
-
-		boolean result = predicate.test(this.request);
-		assertFalse(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("baz"));
-	}
-
-	@Test
-	public void andBothSucceed() {
-		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
-		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertTrue(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertEquals("baz", this.request.attributes().get("left"));
-		assertEquals("qux", this.request.attributes().get("right"));
-	}
-
-	@Test
-	public void andLeftSucceed() {
-		RequestPredicate left = new AddAttributePredicate(true, "left", "bar");
-		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertFalse(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("left"));
-		assertFalse(this.request.attributes().containsKey("right"));
-	}
-
-	@Test
-	public void andRightSucceed() {
-		RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
-		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertFalse(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("left"));
-		assertFalse(this.request.attributes().containsKey("right"));
-	}
-
-	@Test
-	public void andBothFail() {
-		RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
-		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertFalse(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("left"));
-		assertFalse(this.request.attributes().containsKey("right"));
-	}
-
-	@Test
-	public void orBothSucceed() {
-		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
-		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertTrue(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertEquals("baz", this.request.attributes().get("left"));
-		assertFalse(this.request.attributes().containsKey("right"));
-	}
-
-	@Test
-	public void orLeftSucceed() {
-		RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
-		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertTrue(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertEquals("baz", this.request.attributes().get("left"));
-		assertFalse(this.request.attributes().containsKey("right"));
-	}
-
-	@Test
-	public void orRightSucceed() {
-		RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
-		RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertTrue(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("left"));
-		assertEquals("qux", this.request.attributes().get("right"));
-	}
-
-	@Test
-	public void orBothFail() {
-		RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
-		RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
-		RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
-
-		boolean result = predicate.test(this.request);
-		assertFalse(result);
-
-		assertEquals("bar", this.request.attributes().get("exchange"));
-		assertFalse(this.request.attributes().containsKey("baz"));
-		assertFalse(this.request.attributes().containsKey("quux"));
-	}
+        this.request = new DefaultServerRequest(webExchange,
+                Collections.singletonList(
+                        new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes())));
+    }
 
 
-	private static class AddAttributePredicate implements RequestPredicate {
+    @Test
+    public void negateSucceed() {
+        RequestPredicate predicate = new AddAttributePredicate(false, "predicate", "baz").negate();
 
-		private boolean result;
+        boolean result = predicate.test(this.request);
+        assertTrue(result);
 
-		private final String key;
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertEquals("baz", this.request.attributes().get("predicate"));
+    }
 
-		private final String value;
+    @Test
+    public void negateFail() {
+        RequestPredicate predicate = new AddAttributePredicate(true, "predicate", "baz").negate();
 
-		private AddAttributePredicate(boolean result, String key, String value) {
-			this.result = result;
-			this.key = key;
-			this.value = value;
-		}
+        boolean result = predicate.test(this.request);
+        assertFalse(result);
 
-		@Override
-		public boolean test(ServerRequest request) {
-			request.attributes().put(key, value);
-			return this.result;
-		}
-	}
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("baz"));
+    }
+
+    @Test
+    public void andBothSucceed() {
+        RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
+        RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertTrue(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertEquals("baz", this.request.attributes().get("left"));
+        assertEquals("qux", this.request.attributes().get("right"));
+    }
+
+    @Test
+    public void andLeftSucceed() {
+        RequestPredicate left = new AddAttributePredicate(true, "left", "bar");
+        RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertFalse(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("left"));
+        assertFalse(this.request.attributes().containsKey("right"));
+    }
+
+    @Test
+    public void andRightSucceed() {
+        RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
+        RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertFalse(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("left"));
+        assertFalse(this.request.attributes().containsKey("right"));
+    }
+
+    @Test
+    public void andBothFail() {
+        RequestPredicate left = new AddAttributePredicate(false, "left", "bar");
+        RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.AndRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertFalse(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("left"));
+        assertFalse(this.request.attributes().containsKey("right"));
+    }
+
+    @Test
+    public void orBothSucceed() {
+        RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
+        RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertTrue(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertEquals("baz", this.request.attributes().get("left"));
+        assertFalse(this.request.attributes().containsKey("right"));
+    }
+
+    @Test
+    public void orLeftSucceed() {
+        RequestPredicate left = new AddAttributePredicate(true, "left", "baz");
+        RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertTrue(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertEquals("baz", this.request.attributes().get("left"));
+        assertFalse(this.request.attributes().containsKey("right"));
+    }
+
+    @Test
+    public void orRightSucceed() {
+        RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
+        RequestPredicate right = new AddAttributePredicate(true, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertTrue(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("left"));
+        assertEquals("qux", this.request.attributes().get("right"));
+    }
+
+    @Test
+    public void orBothFail() {
+        RequestPredicate left = new AddAttributePredicate(false, "left", "baz");
+        RequestPredicate right = new AddAttributePredicate(false, "right", "qux");
+        RequestPredicate predicate = new RequestPredicates.OrRequestPredicate(left, right);
+
+        boolean result = predicate.test(this.request);
+        assertFalse(result);
+
+        assertEquals("bar", this.request.attributes().get("exchange"));
+        assertFalse(this.request.attributes().containsKey("baz"));
+        assertFalse(this.request.attributes().containsKey("quux"));
+    }
+
+
+    private static class AddAttributePredicate implements RequestPredicate {
+
+        private final String key;
+        private final String value;
+        private boolean result;
+
+        private AddAttributePredicate(boolean result, String key, String value) {
+            this.result = result;
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public boolean test(ServerRequest request) {
+            request.attributes().put(key, value);
+            return this.result;
+        }
+    }
 
 }

@@ -54,91 +54,89 @@ import static org.junit.Assert.*;
  */
 public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	@Override
-	protected HttpHandler createHttpHandler() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
+    private static DataBuffer asDataBuffer(String text) {
+        DefaultDataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer();
+        return buffer.write(text.getBytes(StandardCharsets.UTF_8));
+    }
 
-		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
-				.exceptionHandler(new ResponseStatusExceptionHandler())
-				.build();
-	}
+    @Override
+    protected HttpHandler createHttpHandler() {
+        AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
+        wac.register(WebConfig.class);
+        wac.refresh();
 
+        return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
+                .exceptionHandler(new ResponseStatusExceptionHandler())
+                .build();
+    }
 
-	@Test
-	public void testRequestToFooHandler() throws Exception {
-		URI url = new URI("http://localhost:" + this.port + "/foo");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+    @Test
+    public void testRequestToFooHandler() throws Exception {
+        URI url = new URI("http://localhost:" + this.port + "/foo");
+        RequestEntity<Void> request = RequestEntity.get(url).build();
+        ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("foo".getBytes("UTF-8"), response.getBody());
-	}
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertArrayEquals("foo".getBytes("UTF-8"), response.getBody());
+    }
 
-	@Test
-	public void testRequestToBarHandler() throws Exception {
-		URI url = new URI("http://localhost:" + this.port + "/bar");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+    @Test
+    public void testRequestToBarHandler() throws Exception {
+        URI url = new URI("http://localhost:" + this.port + "/bar");
+        RequestEntity<Void> request = RequestEntity.get(url).build();
+        ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("bar".getBytes("UTF-8"), response.getBody());
-	}
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertArrayEquals("bar".getBytes("UTF-8"), response.getBody());
+    }
 
-	@Test
-	public void testRequestToHeaderSettingHandler() throws Exception {
-		URI url = new URI("http://localhost:" + this.port + "/header");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+    @Test
+    public void testRequestToHeaderSettingHandler() throws Exception {
+        URI url = new URI("http://localhost:" + this.port + "/header");
+        RequestEntity<Void> request = RequestEntity.get(url).build();
+        ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("bar", response.getHeaders().getFirst("foo"));
-	}
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("bar", response.getHeaders().getFirst("foo"));
+    }
 
-	@Test
-	public void testHandlerNotFound() throws Exception {
-		URI url = new URI("http://localhost:" + this.port + "/oops");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		try {
-			new RestTemplate().exchange(request, byte[].class);
-		}
-		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-		}
-	}
+    @Test
+    public void testHandlerNotFound() throws Exception {
+        URI url = new URI("http://localhost:" + this.port + "/oops");
+        RequestEntity<Void> request = RequestEntity.get(url).build();
+        try {
+            new RestTemplate().exchange(request, byte[].class);
+        }
+        catch (HttpClientErrorException ex) {
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        }
+    }
 
-	private static DataBuffer asDataBuffer(String text) {
-		DefaultDataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer();
-		return buffer.write(text.getBytes(StandardCharsets.UTF_8));
-	}
+    @Configuration
+    static class WebConfig {
 
+        @Bean
+        public SimpleUrlHandlerMapping handlerMapping() {
+            return new SimpleUrlHandlerMapping() {
+                {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("/foo", (WebHandler) exchange ->
+                            exchange.getResponse().writeWith(Flux.just(asDataBuffer("foo"))));
+                    map.put("/bar", (WebHandler) exchange ->
+                            exchange.getResponse().writeWith(Flux.just(asDataBuffer("bar"))));
+                    map.put("/header", (WebHandler) exchange -> {
+                        exchange.getResponse().getHeaders().add("foo", "bar");
+                        return Mono.empty();
+                    });
+                    setUrlMap(map);
+                }
+            };
+        }
 
-	@Configuration
-	static class WebConfig {
-
-		@Bean
-		public SimpleUrlHandlerMapping handlerMapping() {
-			return new SimpleUrlHandlerMapping() {
-				{
-					Map<String, Object> map = new HashMap<>();
-					map.put("/foo", (WebHandler) exchange ->
-							exchange.getResponse().writeWith(Flux.just(asDataBuffer("foo"))));
-					map.put("/bar", (WebHandler) exchange ->
-							exchange.getResponse().writeWith(Flux.just(asDataBuffer("bar"))));
-					map.put("/header", (WebHandler) exchange -> {
-						exchange.getResponse().getHeaders().add("foo", "bar");
-						return Mono.empty();
-					});
-					setUrlMap(map);
-				}
-			};
-		}
-
-		@Bean
-		public SimpleHandlerAdapter handlerAdapter() {
-			return new SimpleHandlerAdapter();
-		}
-	}
+        @Bean
+        public SimpleHandlerAdapter handlerAdapter() {
+            return new SimpleHandlerAdapter();
+        }
+    }
 
 }

@@ -30,58 +30,56 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 class TestableAsyncUncaughtExceptionHandler
-		implements AsyncUncaughtExceptionHandler {
+        implements AsyncUncaughtExceptionHandler {
 
-	private final CountDownLatch latch = new CountDownLatch(1);
+    private final CountDownLatch latch = new CountDownLatch(1);
+    private final boolean throwUnexpectedException;
+    private UncaughtExceptionDescriptor descriptor;
 
-	private UncaughtExceptionDescriptor descriptor;
+    TestableAsyncUncaughtExceptionHandler() {
+        this(false);
+    }
 
-	private final boolean throwUnexpectedException;
+    TestableAsyncUncaughtExceptionHandler(boolean throwUnexpectedException) {
+        this.throwUnexpectedException = throwUnexpectedException;
+    }
 
-	TestableAsyncUncaughtExceptionHandler() {
-		this(false);
-	}
+    @Override
+    public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+        descriptor = new UncaughtExceptionDescriptor(ex, method);
+        this.latch.countDown();
+        if (throwUnexpectedException) {
+            throw new IllegalStateException("Test exception");
+        }
+    }
 
-	TestableAsyncUncaughtExceptionHandler(boolean throwUnexpectedException) {
-		this.throwUnexpectedException = throwUnexpectedException;
-	}
+    public boolean isCalled() {
+        return descriptor != null;
+    }
 
-	@Override
-	public void handleUncaughtException(Throwable ex, Method method, Object... params) {
-		descriptor = new UncaughtExceptionDescriptor(ex, method);
-		this.latch.countDown();
-		if (throwUnexpectedException) {
-			throw new IllegalStateException("Test exception");
-		}
-	}
+    public void assertCalledWith(Method expectedMethod, Class<? extends Throwable> expectedExceptionType) {
+        assertNotNull("Handler not called", descriptor);
+        assertEquals("Wrong exception type", expectedExceptionType, descriptor.ex.getClass());
+        assertEquals("Wrong method", expectedMethod, descriptor.method);
+    }
 
-	public boolean isCalled() {
-		return descriptor != null;
-	}
+    public void await(long timeout) {
+        try {
+            this.latch.await(timeout, TimeUnit.MILLISECONDS);
+        }
+        catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
-	public void assertCalledWith(Method expectedMethod, Class<? extends Throwable> expectedExceptionType) {
-		assertNotNull("Handler not called", descriptor);
-		assertEquals("Wrong exception type", expectedExceptionType, descriptor.ex.getClass());
-		assertEquals("Wrong method", expectedMethod, descriptor.method);
-	}
+    private static class UncaughtExceptionDescriptor {
+        private final Throwable ex;
 
-	public void await(long timeout) {
-		try {
-			this.latch.await(timeout, TimeUnit.MILLISECONDS);
-		}
-		catch (Exception e) {
-			Thread.currentThread().interrupt();
-		}
-	}
+        private final Method method;
 
-	private static class UncaughtExceptionDescriptor {
-		private final Throwable ex;
-
-		private final Method method;
-
-		private UncaughtExceptionDescriptor(Throwable ex, Method method) {
-			this.ex = ex;
-			this.method = method;
-		}
-	}
+        private UncaughtExceptionDescriptor(Throwable ex, Method method) {
+            this.ex = ex;
+            this.method = method;
+        }
+    }
 }

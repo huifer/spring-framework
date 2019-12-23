@@ -16,10 +16,7 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -31,6 +28,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -41,43 +40,43 @@ import static org.junit.Assert.assertEquals;
  */
 public class RequestScopedControllerAdviceIntegrationTests {
 
-	@Test // gh-23985
-	public void loadContextWithRequestScopedControllerAdvice() {
-		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-		context.setServletContext(new MockServletContext());
-		context.register(Config.class);
-		context.refresh();
+    @Test // gh-23985
+    public void loadContextWithRequestScopedControllerAdvice() {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.setServletContext(new MockServletContext());
+        context.register(Config.class);
+        context.refresh();
 
-		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
-		assertEquals(1, adviceBeans.size());
+        List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
+        assertEquals(1, adviceBeans.size());
 
-		ControllerAdviceBean adviceBean = adviceBeans.get(0);
-		assertEquals(RequestScopedControllerAdvice.class, adviceBean.getBeanType());
-		assertEquals(42, adviceBean.getOrder());
+        ControllerAdviceBean adviceBean = adviceBeans.get(0);
+        assertEquals(RequestScopedControllerAdvice.class, adviceBean.getBeanType());
+        assertEquals(42, adviceBean.getOrder());
 
-		context.close();
-	}
+        context.close();
+    }
 
 
-	@Configuration
-	@EnableWebMvc
-	static class Config {
+    @Configuration
+    @EnableWebMvc
+    static class Config {
 
-		@Bean
-		@RequestScope
-		RequestScopedControllerAdvice requestScopedControllerAdvice() {
-			return new RequestScopedControllerAdvice();
-		}
-	}
+        @Bean
+        @RequestScope
+        RequestScopedControllerAdvice requestScopedControllerAdvice() {
+            return new RequestScopedControllerAdvice();
+        }
+    }
 
-	@ControllerAdvice
-	@Order(42)
-	static class RequestScopedControllerAdvice implements Ordered {
+    @ControllerAdvice
+    @Order(42)
+    static class RequestScopedControllerAdvice implements Ordered {
 
-		@Override
-		public int getOrder() {
-			return 99;
-		}
-	}
+        @Override
+        public int getOrder() {
+            return 99;
+        }
+    }
 
 }

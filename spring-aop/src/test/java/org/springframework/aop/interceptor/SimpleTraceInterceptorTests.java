@@ -20,7 +20,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -31,41 +31,41 @@ import static org.mockito.BDDMockito.*;
  */
 public class SimpleTraceInterceptorTests {
 
-	@Test
-	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
-		given(mi.getThis()).willReturn(this);
+    @Test
+    public void testSunnyDayPathLogsCorrectly() throws Throwable {
+        MethodInvocation mi = mock(MethodInvocation.class);
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
+        given(mi.getThis()).willReturn(this);
 
-		Log log = mock(Log.class);
+        Log log = mock(Log.class);
 
-		SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
-		interceptor.invokeUnderTrace(mi, log);
+        SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
+        interceptor.invokeUnderTrace(mi, log);
 
-		verify(log, times(2)).trace(anyString());
-	}
+        verify(log, times(2)).trace(anyString());
+    }
 
-	@Test
-	public void testExceptionPathStillLogsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
-		given(mi.getThis()).willReturn(this);
-		IllegalArgumentException exception = new IllegalArgumentException();
-		given(mi.proceed()).willThrow(exception);
+    @Test
+    public void testExceptionPathStillLogsCorrectly() throws Throwable {
+        MethodInvocation mi = mock(MethodInvocation.class);
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
+        given(mi.getThis()).willReturn(this);
+        IllegalArgumentException exception = new IllegalArgumentException();
+        given(mi.proceed()).willThrow(exception);
 
-		Log log = mock(Log.class);
+        Log log = mock(Log.class);
 
-		final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
+        final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+        try {
+            interceptor.invokeUnderTrace(mi, log);
+            fail("Must have propagated the IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException expected) {
+        }
 
-		verify(log).trace(anyString());
-		verify(log).trace(anyString(), eq(exception));
-	}
+        verify(log).trace(anyString());
+        verify(log).trace(anyString(), eq(exception));
+    }
 
 }

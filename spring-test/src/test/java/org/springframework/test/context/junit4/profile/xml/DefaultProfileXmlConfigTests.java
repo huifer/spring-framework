@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.profile.xml;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -35,22 +34,22 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class DefaultProfileXmlConfigTests {
 
-	@Autowired
-	protected Pet pet;
+    @Autowired
+    protected Pet pet;
 
-	@Autowired(required = false)
-	protected Employee employee;
+    @Autowired(required = false)
+    protected Employee employee;
 
 
-	@Test
-	public void pet() {
-		assertNotNull(pet);
-		assertEquals("Fido", pet.getName());
-	}
+    @Test
+    public void pet() {
+        assertNotNull(pet);
+        assertEquals("Fido", pet.getName());
+    }
 
-	@Test
-	public void employee() {
-		assertNull("employee bean should not be created for the default profile", employee);
-	}
+    @Test
+    public void employee() {
+        assertNull("employee bean should not be created for the default profile", employee);
+    }
 
 }

@@ -34,37 +34,35 @@ import static org.junit.Assert.*;
  */
 public class BeanMethodMetadataTests {
 
-	@Test
-	public void providesBeanMethodBeanDefinition() throws Exception {
-		AnnotationConfigApplicationContext context= new AnnotationConfigApplicationContext(Conf.class);
-		BeanDefinition beanDefinition = context.getBeanDefinition("myBean");
-		assertThat("should provide AnnotatedBeanDefinition", beanDefinition, instanceOf(AnnotatedBeanDefinition.class));
-		Map<String, Object> annotationAttributes =
-				((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata().getAnnotationAttributes(MyAnnotation.class.getName());
-		assertThat(annotationAttributes.get("value"), equalTo("test"));
-		context.close();
-	}
+    @Test
+    public void providesBeanMethodBeanDefinition() throws Exception {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Conf.class);
+        BeanDefinition beanDefinition = context.getBeanDefinition("myBean");
+        assertThat("should provide AnnotatedBeanDefinition", beanDefinition, instanceOf(AnnotatedBeanDefinition.class));
+        Map<String, Object> annotationAttributes =
+                ((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata().getAnnotationAttributes(MyAnnotation.class.getName());
+        assertThat(annotationAttributes.get("value"), equalTo("test"));
+        context.close();
+    }
 
 
-	@Configuration
-	static class Conf {
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface MyAnnotation {
 
-		@Bean
-		@MyAnnotation("test")
-		public MyBean myBean() {
-			return new MyBean();
-		}
-	}
+        String value();
+    }
 
+    @Configuration
+    static class Conf {
 
-	static class MyBean {
-	}
+        @Bean
+        @MyAnnotation("test")
+        public MyBean myBean() {
+            return new MyBean();
+        }
+    }
 
-
-	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface MyAnnotation {
-
-		String value();
-	}
+    static class MyBean {
+    }
 
 }

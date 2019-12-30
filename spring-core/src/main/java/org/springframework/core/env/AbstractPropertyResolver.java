@@ -45,6 +45,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
     private volatile ConfigurableConversionService conversionService;
     @Nullable
     private PropertyPlaceholderHelper nonStrictHelper;
+    /**
+     * 属性占位符工具
+     */
     @Nullable
     private PropertyPlaceholderHelper strictHelper;
     private boolean ignoreUnresolvableNestedPlaceholders = false;
@@ -197,11 +200,22 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
         return doResolvePlaceholders(text, this.nonStrictHelper);
     }
 
+    /**
+     * 解析占位符,将配置文件`beans.xml`解析一个完整的路径
+     *
+     * @param text
+     * @return
+     * @throws IllegalArgumentException
+     */
     @Override
     public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+        // 脚本解析器? 不知道怎么翻译,
+        // 判断 strictHelper 是否为空
         if (this.strictHelper == null) {
+            // 构建strictHelper
             this.strictHelper = createPlaceholderHelper(false);
         }
+        // 执行解析方法
         return doResolvePlaceholders(text, this.strictHelper);
     }
 

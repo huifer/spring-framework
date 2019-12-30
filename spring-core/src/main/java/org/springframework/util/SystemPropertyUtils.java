@@ -25,6 +25,8 @@ import org.springframework.lang.Nullable;
  * e.g. {@code ${user.dir}}. Default values can be supplied using the ":" separator
  * between key and value.
  *
+ *
+ * 定义了 一些系统级别的变量
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
@@ -37,15 +39,18 @@ public abstract class SystemPropertyUtils {
 
     /**
      * Prefix for system property placeholders: "${".
+     * 占位符前缀
      */
     public static final String PLACEHOLDER_PREFIX = "${";
 
     /**
      * Suffix for system property placeholders: "}".
+     * 占位符后缀
      */
     public static final String PLACEHOLDER_SUFFIX = "}";
 
     /**
+     * 分隔符
      * Value separator for system property placeholders: ":".
      */
     public static final String VALUE_SEPARATOR = ":";

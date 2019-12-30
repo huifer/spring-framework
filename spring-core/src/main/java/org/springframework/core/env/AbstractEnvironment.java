@@ -117,6 +117,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
      * {@link #customizePropertySources(MutablePropertySources)} during construction to
      * allow subclasses to contribute or manipulate {@link PropertySource} instances as
      * appropriate.
+     * 创建一个环境变量
      *
      * @see #customizePropertySources(MutablePropertySources)
      */
@@ -195,6 +196,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
      * property source manipulation and instance variable access directly within the
      * subclass constructor. Note that <em>assigning</em> values to instance variables is
      * not problematic; it is only attempting to read default values that must be avoided.
+     * <p>
+     * <p>
+     * 这是一个模板,实现在子类上{@link StandardEnvironment#customizePropertySources(org.springframework.core.env.MutablePropertySources)}
+     * {@link org.springframework.web.context.support.StandardServletEnvironment#customizePropertySources(org.springframework.core.env.MutablePropertySources)}
      *
      * @see MutablePropertySources
      * @see PropertySourcesPropertyResolver
@@ -388,6 +393,13 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
         return this.propertySources;
     }
 
+    /**
+     * 获取 JVM 相关的配置信息
+     * <p>
+     * {@link StandardEnvironment#SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}
+     *
+     * @return JVM 环境变量
+     */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Map<String, Object> getSystemProperties() {
@@ -414,6 +426,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
         }
     }
 
+    /**
+     * 操作系统环境变量
+     * @return
+     */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Map<String, Object> getSystemEnvironment() {
@@ -577,6 +593,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
         return this.propertyResolver.resolvePlaceholders(text);
     }
 
+    /**
+     * 解析占位符
+     * @param text
+     * @return
+     * @throws IllegalArgumentException
+     */
     @Override
     public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
         return this.propertyResolver.resolveRequiredPlaceholders(text);

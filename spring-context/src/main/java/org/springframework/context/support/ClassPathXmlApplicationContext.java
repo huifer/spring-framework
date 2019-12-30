@@ -78,10 +78,12 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     }
 
     /**
+     * 构造方法,根据传入的配置文件进行初始化上下文
      * Create a new ClassPathXmlApplicationContext, loading the definitions
      * from the given XML file and automatically refreshing the context.
      *
      * @param configLocation resource location
+     *                       本地的spring配置文件
      * @throws BeansException if context creation failed
      */
     public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
@@ -89,10 +91,12 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     }
 
     /**
+     * 构造方法
      * Create a new ClassPathXmlApplicationContext, loading the definitions
      * from the given XML files and automatically refreshing the context.
      *
      * @param configLocations array of resource locations
+     *                        多个本地 spring 配置文件
      * @throws BeansException if context creation failed
      */
     public ClassPathXmlApplicationContext(String... configLocations) throws BeansException {
@@ -100,12 +104,15 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     }
 
     /**
+     * 构造方法
      * Create a new ClassPathXmlApplicationContext with the given parent,
      * loading the definitions from the given XML files and automatically
      * refreshing the context.
      *
      * @param configLocations array of resource locations
+     *                        多个本地 spring 配置文件
      * @param parent          the parent context
+     *                        父上下文
      * @throws BeansException if context creation failed
      */
     public ClassPathXmlApplicationContext(String[] configLocations, @Nullable ApplicationContext parent)
@@ -134,10 +141,13 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
      * loading the definitions from the given XML files.
      *
      * @param configLocations array of resource locations
+     *                        多个本地 spring 配置文件
      * @param refresh         whether to automatically refresh the context,
      *                        loading all bean definitions and creating all singletons.
      *                        Alternatively, call refresh manually after further configuring the context.
+     *                        是否刷新上下文
      * @param parent          the parent context
+     *                        父上下文
      * @throws BeansException if context creation failed
      * @see #refresh()
      */
@@ -145,6 +155,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
             String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
             throws BeansException {
 
+        // 调用上层`AbstractXmlApplicationContext`
         super(parent);
         setConfigLocations(configLocations);
         if (refresh) {

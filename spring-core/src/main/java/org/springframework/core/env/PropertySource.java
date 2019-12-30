@@ -46,6 +46,8 @@ import org.springframework.util.ObjectUtils;
  * the @{@link org.springframework.context.annotation.PropertySource PropertySource}
  * annotation provides a convenient and declarative way of adding property sources to the
  * enclosing {@code Environment}.
+ * <p>
+ * 配置源
  *
  * @param <T> the source type
  * @author Chris Beams
@@ -58,10 +60,19 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class PropertySource<T> {
 
+    /**
+     * 日志
+     */
     protected final Log logger = LogFactory.getLog(getClass());
 
+    /**
+     * 名称
+     */
     protected final String name;
 
+    /**
+     * 元数据
+     */
     protected final T source;
 
 

@@ -16,45 +16,16 @@
 
 package org.springframework.aop.framework;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.rmi.MarshalException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import test.mixin.LockMixin;
-import test.mixin.LockMixinAdvisor;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
-
-import org.springframework.aop.Advisor;
-import org.springframework.aop.AfterReturningAdvice;
-import org.springframework.aop.DynamicIntroductionAdvice;
-import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.ThrowsAdvice;
+import org.springframework.aop.*;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.DynamicMethodMatcherPointcut;
-import org.springframework.aop.support.NameMatchMethodPointcut;
-import org.springframework.aop.support.Pointcuts;
-import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.*;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.lang.Nullable;
@@ -68,13 +39,21 @@ import org.springframework.tests.aop.advice.MyThrowsHandler;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.Person;
-import org.springframework.tests.sample.beans.SerializablePerson;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.*;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.rmi.MarshalException;
+import java.sql.SQLException;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -543,7 +522,6 @@ public abstract class AbstractAopProxyTests {
      * Check that although a method is eligible for advice chain optimization and
      * direct reflective invocation, it doesn't happen if we've asked to see the proxy,
      * so as to guarantee a consistent programming model.
-     *
      * @throws Throwable
      */
     @Test
@@ -1261,18 +1239,15 @@ MethodInterceptor() {
             public Class<?> getTargetClass() {
                 return TestBean.class;
             }
-
             @Override
             public boolean isStatic() {
                 return false;
             }
-
             @Override
             public Object getTarget() throws Exception {
                 assertEquals(proxy, AopContext.currentProxy());
                 return target;
             }
-
             @Override
             public void releaseTarget(Object target) throws Exception {
             }
@@ -1346,12 +1321,10 @@ MethodInterceptor() {
         class MapAwareMethodInterceptor implements MethodInterceptor {
             private final Map<String, String> expectedValues;
             private final Map<String, String> valuesToAdd;
-
             public MapAwareMethodInterceptor(Map<String, String> expectedValues, Map<String, String> valuesToAdd) {
                 this.expectedValues = expectedValues;
                 this.valuesToAdd = valuesToAdd;
             }
-
             @Override
             public Object invoke(MethodInvocation invocation) throws Throwable {
                 ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) invocation;
@@ -1483,7 +1456,6 @@ MethodInterceptor() {
     public void testAfterReturningAdvisorIsInvoked() {
         class SummingAfterAdvice implements AfterReturningAdvice {
             public int sum;
-
             @Override
             public void afterReturning(@Nullable Object returnValue, Method m, Object[] args, @Nullable Object target) throws Throwable {
                 sum += ((Integer) returnValue).intValue();
@@ -1623,29 +1595,6 @@ MethodInterceptor() {
         assertEquals(1, th.getCalls("remoteException"));
     }
 
-    public interface INeedsToSeeProxy {
-
-        int getCount();
-
-        void incrementViaThis();
-
-        void incrementViaProxy();
-
-        void increment();
-    }
-
-
-    public static interface IOverloads {
-
-        void overload();
-
-        int overload(int i);
-
-        String overload(String foo);
-
-        void noAdvice();
-    }
-
     private static class CheckMethodInvocationIsSameInAndOutInterceptor implements MethodInterceptor {
 
         @Override
@@ -1656,6 +1605,7 @@ MethodInterceptor() {
             return retval;
         }
     }
+
 
     /**
      * ExposeInvocation must be set to true.
@@ -1681,6 +1631,7 @@ MethodInterceptor() {
         }
     }
 
+
     /**
      * Same thing for a proxy.
      * Only works when exposeProxy is set to true.
@@ -1696,6 +1647,7 @@ MethodInterceptor() {
             return ret;
         }
     }
+
 
     /**
      * Fires on setter methods that take a string. Replaces null arg with "".
@@ -1719,7 +1671,6 @@ MethodInterceptor() {
                 public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
                     return args[0] == null;
                 }
-
                 @Override
                 public boolean matches(Method m, @Nullable Class<?> targetClass) {
                     return m.getName().startsWith("set") &&
@@ -1729,6 +1680,7 @@ MethodInterceptor() {
             });
         }
     }
+
 
     @SuppressWarnings("serial")
     protected static class TestDynamicPointcutAdvice extends DefaultPointcutAdvisor {
@@ -1748,6 +1700,7 @@ MethodInterceptor() {
         }
     }
 
+
     @SuppressWarnings("serial")
     protected static class TestDynamicPointcutForSettersOnly extends DefaultPointcutAdvisor {
 
@@ -1762,7 +1715,6 @@ MethodInterceptor() {
                     if (run) ++count;
                     return run;
                 }
-
                 @Override
                 public boolean matches(Method m, @Nullable Class<?> clazz) {
                     return m.getName().startsWith("set");
@@ -1770,6 +1722,7 @@ MethodInterceptor() {
             });
         }
     }
+
 
     @SuppressWarnings("serial")
     protected static class TestStaticPointcutAdvice extends StaticMethodMatcherPointcutAdvisor {
@@ -1780,12 +1733,12 @@ MethodInterceptor() {
             super(mi);
             this.pattern = pattern;
         }
-
         @Override
         public boolean matches(Method m, @Nullable Class<?> targetClass) {
             return m.getName().contains(pattern);
         }
     }
+
 
     /**
      * Note that trapping the Invocation as in previous version of this test
@@ -1804,6 +1757,7 @@ MethodInterceptor() {
         }
     }
 
+
     private static class DummyIntroductionAdviceImpl implements DynamicIntroductionAdvice {
 
         @Override
@@ -1812,6 +1766,7 @@ MethodInterceptor() {
         }
     }
 
+
     public static class OwnSpouse extends TestBean {
 
         @Override
@@ -1819,6 +1774,7 @@ MethodInterceptor() {
             return this;
         }
     }
+
 
     public static class AllInstancesAreEqual implements IOther {
 
@@ -1836,6 +1792,19 @@ MethodInterceptor() {
         public void absquatulate() {
         }
     }
+
+
+    public interface INeedsToSeeProxy {
+
+        int getCount();
+
+        void incrementViaThis();
+
+        void incrementViaProxy();
+
+        void increment();
+    }
+
 
     public static class NeedsToSeeProxy implements INeedsToSeeProxy {
 
@@ -1868,6 +1837,7 @@ MethodInterceptor() {
         }
     }
 
+
     public static class TargetChecker extends NeedsToSeeProxy {
 
         @Override
@@ -1876,6 +1846,7 @@ MethodInterceptor() {
             //assertEquals(advised.getTarget(), this);
         }
     }
+
 
     public static class CountingAdvisorListener implements AdvisedSupportListener {
 
@@ -1900,6 +1871,7 @@ MethodInterceptor() {
         }
     }
 
+
     public static class RefreshCountingAdvisorChainFactory implements AdvisedSupportListener {
 
         public int refreshes;
@@ -1914,6 +1886,19 @@ MethodInterceptor() {
             ++refreshes;
         }
     }
+
+
+    public static interface IOverloads {
+
+        void overload();
+
+        int overload(int i);
+
+        String overload(String foo);
+
+        void noAdvice();
+    }
+
 
     public static class Overloads implements IOverloads {
 
@@ -1994,9 +1979,11 @@ MethodInterceptor() {
 
     static class MockTargetSource implements TargetSource {
 
-        public int gets;
-        public int releases;
         private Object target;
+
+        public int gets;
+
+        public int releases;
 
         public void reset() {
             this.target = null;
@@ -2020,10 +2007,6 @@ MethodInterceptor() {
             return target;
         }
 
-        public void setTarget(Object target) {
-            this.target = target;
-        }
-
         /**
          * @see org.springframework.aop.TargetSource#releaseTarget(java.lang.Object)
          */
@@ -2036,6 +2019,7 @@ MethodInterceptor() {
 
         /**
          * Check that gets and releases match
+         *
          */
         public void verify() {
             if (gets != releases)

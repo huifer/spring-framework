@@ -5,6 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,16 +17,45 @@
 
 package org.springframework.aop.framework;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.rmi.MarshalException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.aop.*;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
+
+import org.springframework.aop.Advisor;
+import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.DynamicIntroductionAdvice;
+import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.aop.support.*;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.support.DynamicMethodMatcherPointcut;
+import org.springframework.aop.support.NameMatchMethodPointcut;
+import org.springframework.aop.support.Pointcuts;
+import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.lang.Nullable;
@@ -39,21 +69,13 @@ import org.springframework.tests.aop.advice.MyThrowsHandler;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
-import org.springframework.tests.sample.beans.*;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import test.mixin.LockMixin;
-import test.mixin.LockMixinAdvisor;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.rmi.MarshalException;
-import java.sql.SQLException;
-import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -144,7 +166,7 @@ public abstract class AbstractAopProxyTests {
         sw.start("Create " + howMany + " proxies");
         testManyProxies(howMany);
         sw.stop();
-        assertTrue("Proxy creation was too slow", sw.getTotalTimeMillis() < 5000);
+        assertTrue("Proxy creation was too slow",  sw.getTotalTimeMillis() < 5000);
     }
 
     private void testManyProxies(int howMany) {
@@ -1145,17 +1167,7 @@ public abstract class AbstractAopProxyTests {
         /**
          * Changes the name, then changes it back.
          */
-        MethodInterceptor nameReverter = new         class NameSaver implements MethodInterceptor {
-            private List<Object> names = new LinkedList<>();
-
-            @Override
-            public Object invoke(MethodInvocation mi) throws Throwable {
-                names.add(mi.getArguments()[0]);
-                return mi.proceed();
-            }
-        };
-
-MethodInterceptor() {
+        MethodInterceptor nameReverter = new MethodInterceptor() {
             @Override
             public Object invoke(MethodInvocation mi) throws Throwable {
                 MethodInvocation clone = ((ReflectiveMethodInvocation) mi).invocableClone();
@@ -1164,6 +1176,16 @@ MethodInterceptor() {
                 // Original method invocation should be unaffected by changes to argument list of clone
                 mi.proceed();
                 return clone.proceed();
+            }
+        };
+
+        class NameSaver implements MethodInterceptor {
+            private List<Object> names = new LinkedList<>();
+
+            @Override
+            public Object invoke(MethodInvocation mi) throws Throwable {
+                names.add(mi.getArguments()[0]);
+                return mi.proceed();
             }
         }
 
@@ -1328,7 +1350,7 @@ MethodInterceptor() {
             @Override
             public Object invoke(MethodInvocation invocation) throws Throwable {
                 ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) invocation;
-                for (Iterator<String> it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ) {
+                for (Iterator<String> it = rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ){
                     Object key = it.next();
                     assertEquals(expectedValues.get(key), rmi.getUserAttributes().get(key));
                 }
@@ -1398,7 +1420,7 @@ MethodInterceptor() {
         assertEquals(26, proxied.getAge());
         assertEquals(4, cca.getCalls());
         try {
-            proxied.exceptional(new SpecializedUncheckedException("foo", (SQLException) null));
+            proxied.exceptional(new SpecializedUncheckedException("foo", (SQLException)null));
             fail("Should have thrown CannotGetJdbcConnectionException");
         }
         catch (SpecializedUncheckedException ex) {
@@ -1990,6 +2012,10 @@ MethodInterceptor() {
             gets = releases = 0;
         }
 
+        public void setTarget(Object target) {
+            this.target = target;
+        }
+
         /**
          * @see org.springframework.aop.TargetSource#getTargetClass()
          */
@@ -2067,3 +2093,4 @@ MethodInterceptor() {
     }
 
 }
+

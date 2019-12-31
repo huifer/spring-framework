@@ -39,6 +39,9 @@ import java.util.*;
  * Intended for use by both the main parser and any extension
  * {@link BeanDefinitionParser BeanDefinitionParsers} or
  * {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
+ * <p>
+ * <p>
+ * bean 标签的一堆定义
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -330,15 +333,19 @@ public class BeanDefinitionParserDelegate {
      */
     @Nullable
     public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+        // 获取id 属性
         String id = ele.getAttribute(ID_ATTRIBUTE);
+        // 获取 name 属性
         String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
+        // 别名列表
         List<String> aliases = new ArrayList<>();
         if (StringUtils.hasLength(nameAttr)) {
             String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
             aliases.addAll(Arrays.asList(nameArr));
         }
 
+        // beanName  = <bean id=""/> 中id的属性值
         String beanName = id;
         if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
             beanName = aliases.remove(0);
@@ -352,6 +359,7 @@ public class BeanDefinitionParserDelegate {
             checkNameUniqueness(beanName, aliases, ele);
         }
 
+        // 创建对象
         AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
         if (beanDefinition != null) {
             if (!StringUtils.hasText(beanName)) {
@@ -413,6 +421,8 @@ public class BeanDefinitionParserDelegate {
     /**
      * Parse the bean definition itself, without regard to name or aliases. May return
      * {@code null} if problems occurred during the parsing of the bean definition.
+     * <p>
+     * bean 解析,不考虑名称,别名.
      */
     @Nullable
     public AbstractBeanDefinition parseBeanDefinitionElement(
@@ -421,26 +431,35 @@ public class BeanDefinitionParserDelegate {
         this.parseState.push(new BeanEntry(beanName));
 
         String className = null;
+        // 判断是否有 class 属性
         if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
+            // 获取 <bean class=""> class 的属性值
             className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
         }
         String parent = null;
+        // 判断是否有 parent 熟悉
         if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
             parent = ele.getAttribute(PARENT_ATTRIBUTE);
         }
 
         try {
+            // 创建一个bean
             AbstractBeanDefinition bd = createBeanDefinition(className, parent);
-
+            // 设置其他bean属性
             parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
             bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+            // 解析 meta 标签数据
             parseMetaElements(ele, bd);
+            // 解析 {@code <lookup-method bean="personBean2"></lookup-method>}
             parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+            // 解析 {@code <replaced-method name="" replacer=""/>}
             parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
-
+            // 解析 {@code <constructor-arg name="" value="" index="" ref="" type="" />}
             parseConstructorArgElements(ele, bd);
+            // 解析 {@code <property name="" value=""/>}
             parsePropertyElements(ele, bd);
+            // 解析 {@code <qualifier type="" value=""/>}
             parseQualifierElements(ele, bd);
 
             bd.setResource(this.readerContext.getResource());
@@ -466,6 +485,8 @@ public class BeanDefinitionParserDelegate {
 
     /**
      * Apply the attributes of the given bean element to the given bean * definition.
+     * <p>
+     * bean 标签内的其他属性值 scope,abstract,lazy-init
      *
      * @param ele            bean declaration element
      * @param beanName       bean name
@@ -552,8 +573,10 @@ public class BeanDefinitionParserDelegate {
      * Create a bean definition for the given class name and parent name.
      *
      * @param className  the name of the bean class
+     *                   bean的类全名
      * @param parentName the name of the bean's parent bean
-     * @return the newly created bean definition
+     *                   父类的名称
+     * @return the newly created bean definition, 新的对象
      * @throws ClassNotFoundException if bean class resolution was attempted but failed
      */
     protected AbstractBeanDefinition createBeanDefinition(@Nullable String className, @Nullable String parentName)
@@ -564,6 +587,8 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析Meta 元素
+     * {@code <meta key="h" value="c"/>} => {@link BeanMetadataAttribute}
      * Parse the meta elements underneath the given element, if any.
      */
     public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
@@ -572,7 +597,9 @@ public class BeanDefinitionParserDelegate {
             Node node = nl.item(i);
             if (isCandidateElement(node) && nodeNameEquals(node, META_ELEMENT)) {
                 Element metaElement = (Element) node;
+                // 获取 key 属性值
                 String key = metaElement.getAttribute(KEY_ATTRIBUTE);
+                // 获取  value 属性值
                 String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
                 BeanMetadataAttribute attribute = new BeanMetadataAttribute(key, value);
                 attribute.setSource(extractSource(metaElement));
@@ -609,6 +636,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析{@code <constructor-arg name="" value="" index="" ref="" type="" />} 标签
      * Parse constructor-arg sub-elements of the given bean element.
      */
     public void parseConstructorArgElements(Element beanEle, BeanDefinition bd) {
@@ -622,6 +650,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析 {@code <property name="" value=""/>}
      * Parse property sub-elements of the given bean element.
      */
     public void parsePropertyElements(Element beanEle, BeanDefinition bd) {
@@ -635,6 +664,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析 {@code <qualifier type="" value=""/>}
      * Parse qualifier sub-elements of the given bean element.
      */
     public void parseQualifierElements(Element beanEle, AbstractBeanDefinition bd) {
@@ -648,6 +678,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     *解析{@code <lookup-method bean="personBean2"></lookup-method>}
      * Parse lookup-override sub-elements of the given bean element.
      */
     public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
@@ -666,6 +697,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * {@code <replaced-method name="" replacer=""/>}
      * Parse replaced-method sub-elements of the given bean element.
      */
     public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
@@ -693,6 +725,8 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析 constructor-arg 元素
+     * {@code <constructor-arg name="" value="" index="" ref="" type="" />}
      * Parse a constructor-arg element.
      */
     public void parseConstructorArgElement(Element ele, BeanDefinition bd) {
@@ -1460,6 +1494,7 @@ public class BeanDefinitionParserDelegate {
 
     /**
      * Determine whether the given node indicates the default namespace.
+     * 判断是否是默认命名空间
      */
     public boolean isDefaultNamespace(Node node) {
         return isDefaultNamespace(getNamespaceURI(node));

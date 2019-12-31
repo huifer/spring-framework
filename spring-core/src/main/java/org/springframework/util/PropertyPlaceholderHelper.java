@@ -27,6 +27,8 @@ import java.util.*;
  * {@code ${name}}. Using {@code PropertyPlaceholderHelper} these placeholders can be substituted for
  * user-supplied values. <p> Values for substitution can be supplied using a {@link Properties} instance or
  * using a {@link PlaceholderResolver}.
+ * <p>
+ * 占位符工具
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -36,6 +38,10 @@ public class PropertyPlaceholderHelper {
 
     private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
+    /**
+     * 对应的分割符号
+     * 众所周知的
+     */
     private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<>(4);
 
     static {
@@ -89,6 +95,7 @@ public class PropertyPlaceholderHelper {
         Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
         this.placeholderPrefix = placeholderPrefix;
         this.placeholderSuffix = placeholderSuffix;
+        // 从map对象中获取对应的一个符号
         String simplePrefixForSuffix = wellKnownSimplePrefixes.get(this.placeholderSuffix);
         if (simplePrefixForSuffix != null && this.placeholderPrefix.endsWith(simplePrefixForSuffix)) {
             this.simplePrefix = simplePrefixForSuffix;
@@ -127,15 +134,27 @@ public class PropertyPlaceholderHelper {
         return parseStringValue(value, placeholderResolver, null);
     }
 
+    /**
+     *
+     * @param value 值,"文件地址"
+     * @param placeholderResolver 处理类
+     * @param visitedPlaceholders 占位符
+     * @return
+     */
     protected String parseStringValue(
             String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
+        // 判断是否包含 placeholderPrefix 前缀
         int startIndex = value.indexOf(this.placeholderPrefix);
         if (startIndex == -1) {
+            // 不包含直接返回 value
             return value;
         }
 
         StringBuilder result = new StringBuilder(value);
+        // 匹配到了进入循环
+        // todo: 2019/12/31 spring 占位符替换逻辑解析,解析方式: 通过测试用例进行解析
+
         while (startIndex != -1) {
             int endIndex = findPlaceholderEndIndex(result, startIndex);
             if (endIndex != -1) {

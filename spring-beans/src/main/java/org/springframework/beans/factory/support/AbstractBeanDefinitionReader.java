@@ -183,6 +183,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
     }
 
+    /**
+     * bean 定义解析
+     * @param resources the resource descriptors
+     * @return
+     * @throws BeanDefinitionStoreException
+     */
     @Override
     public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
         Assert.notNull(resources, "Resource array must not be null");
@@ -202,9 +208,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
      * Load bean definitions from the specified resource location.
      * <p>The location can also be a location pattern, provided that the
      * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
+     * <p>
+     * 从指定的资源路径加载bean ,返回 bean的数量(自定义的bean)
      *
      * @param location        the resource location, to be loaded with the ResourceLoader
      *                        (or ResourcePatternResolver) of this bean definition reader
+     *                        配置路径,spring.xml
      * @param actualResources a Set to be filled with the actual Resource objects
      *                        that have been resolved during the loading process. May be {@code null}
      *                        to indicate that the caller is not interested in those Resource objects.
@@ -215,6 +224,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
      * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
      */
     public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualResources) throws BeanDefinitionStoreException {
+        // 获取资源加载器
         ResourceLoader resourceLoader = getResourceLoader();
         if (resourceLoader == null) {
             throw new BeanDefinitionStoreException(
@@ -224,7 +234,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         if (resourceLoader instanceof ResourcePatternResolver) {
             // Resource pattern matching available.
             try {
+                // 获取Resource
                 Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+                // 解析bean的定义
                 int count = loadBeanDefinitions(resources);
                 if (actualResources != null) {
                     Collections.addAll(actualResources, resources);

@@ -29,8 +29,14 @@ import org.springframework.util.ObjectUtils;
  */
 public class BeanMetadataAttribute implements BeanMetadataElement {
 
+    /***
+     * 属性值名称
+     */
     private final String name;
 
+    /**
+     *属性值
+     */
     @Nullable
     private final Object value;
 

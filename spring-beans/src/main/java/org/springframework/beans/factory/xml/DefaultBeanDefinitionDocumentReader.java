@@ -39,6 +39,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
+ * spring xml的一些定义文字
+ * <p>
  * Default implementation of the {@link BeanDefinitionDocumentReader} interface that
  * reads bean definitions according to the "spring-beans" DTD and XSD format
  * (Spring's default XML bean definition format).
@@ -92,6 +94,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     @Override
     public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
         this.readerContext = readerContext;
+        // 真正的注册bean定义的方法
         doRegisterBeanDefinitions(doc.getDocumentElement());
     }
 
@@ -115,6 +118,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
     /**
      * Register each bean definition within the given root {@code <beans/>} element.
+     * 根据给定的节点解析bean的定义
      */
     @SuppressWarnings("deprecation")  // for Environment.acceptsProfiles(String...)
     protected void doRegisterBeanDefinitions(Element root) {
@@ -128,6 +132,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
         this.delegate = createDelegate(getReaderContext(), root, parent);
 
         if (this.delegate.isDefaultNamespace(root)) {
+            // 解析是否有 profile 标签
             String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
             if (StringUtils.hasText(profileSpec)) {
                 String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
@@ -144,13 +149,22 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
             }
         }
 
+        // 啥也没干
         preProcessXml(root);
+        //
         parseBeanDefinitions(root, this.delegate);
+        //
         postProcessXml(root);
 
         this.delegate = parent;
     }
 
+    /**
+     * @param readerContext  当前上下文
+     * @param root           xml节点
+     * @param parentDelegate
+     * @return
+     */
     protected BeanDefinitionParserDelegate createDelegate(
             XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
@@ -162,6 +176,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     /**
      * Parse the elements at the root level in the document:
      * "import", "alias", "bean".
+     * 解析标签,import\alias\bean
      *
      * @param root the DOM root element of the document
      */
@@ -173,6 +188,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
                 if (node instanceof Element) {
                     Element ele = (Element) node;
                     if (delegate.isDefaultNamespace(ele)) {
+                        // 不同标签的解析
                         parseDefaultElement(ele, delegate);
                     }
                     else {
@@ -186,6 +202,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
         }
     }
 
+    /**
+     * 解析不同类型的标签
+     *
+     * @param ele
+     * @param delegate
+     */
     private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
         if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
             importBeanDefinitionResource(ele);
@@ -301,6 +323,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     /**
      * Process the given bean element, parsing the bean definition
      * and registering it with the registry.
+     * <p>
+     * 加载信息并且注册
      */
     protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
         BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);

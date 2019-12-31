@@ -30,6 +30,8 @@ import java.util.List;
  * <p>Any non-final method can be overridden, irrespective of its
  * parameters and return types.
  *
+ *
+ * {@code <replaced-method name="" replacer=""/>} 标签解析
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1

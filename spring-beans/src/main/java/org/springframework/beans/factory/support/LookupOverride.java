@@ -26,6 +26,8 @@ import java.lang.reflect.Modifier;
  * Represents an override of a method that looks up an object in the same IoC context.
  *
  * <p>Methods eligible for lookup override must not have arguments.
+ * <p>
+ * {@code <lookup-method bean="personBean2"></lookup-method>} 解析内容
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -33,9 +35,15 @@ import java.lang.reflect.Modifier;
  */
 public class LookupOverride extends MethodOverride {
 
+    /**
+     * bean 名称
+     */
     @Nullable
     private final String beanName;
 
+    /**
+     * 方法
+     */
     @Nullable
     private Method method;
 

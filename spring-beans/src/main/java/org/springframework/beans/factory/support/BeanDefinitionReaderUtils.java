@@ -49,10 +49,13 @@ public abstract class BeanDefinitionReaderUtils {
      * eagerly loading the bean class if a ClassLoader has been specified.
      *
      * @param parentName  the name of the parent bean, if any
+     *                     父级bean
      * @param className   the name of the bean class, if any
+     *                     当前class
      * @param classLoader the ClassLoader to use for loading bean classes
      *                    (can be {@code null} to just register bean classes by name)
-     * @return the bean definition
+     *                    加载器
+     * @return the bean definition,bean的定义对象
      * @throws ClassNotFoundException if the bean class could not be loaded
      */
     public static AbstractBeanDefinition createBeanDefinition(

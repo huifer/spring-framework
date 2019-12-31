@@ -138,6 +138,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
         }
     }
 
+    /**
+     * 校验
+     */
     @Override
     public void validateRequiredProperties() {
         MissingRequiredPropertiesException ex = new MissingRequiredPropertiesException();
@@ -237,11 +240,24 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
                 resolvePlaceholders(value) : resolveRequiredPlaceholders(value));
     }
 
+    /**
+     * 构造 占位符解析器
+     *
+     * @param ignoreUnresolvablePlaceholders
+     * @return
+     */
     private PropertyPlaceholderHelper createPlaceholderHelper(boolean ignoreUnresolvablePlaceholders) {
         return new PropertyPlaceholderHelper(this.placeholderPrefix, this.placeholderSuffix,
                 this.valueSeparator, ignoreUnresolvablePlaceholders);
     }
 
+    /**
+     * 执行解析路径
+     *
+     * @param text   文件地址
+     * @param helper 解析器
+     * @return
+     */
     private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
         return helper.replacePlaceholders(text, this::getPropertyAsRawString);
     }

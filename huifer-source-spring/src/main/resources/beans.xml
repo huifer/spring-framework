@@ -3,9 +3,12 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="personBean" class="com.huifer.source.spring.bean.Person">
+    <bean id="personBean" class="com.huifer.source.spring.bean.Person" scope="prototype">
         <property name="name" value="huifer"/>
+
     </bean>
 
-
+    <bean id="personBean2" class="com.huifer.source.spring.bean.Person">
+        <property name="name" value="huifer2"/>
+    </bean>
 </beans>

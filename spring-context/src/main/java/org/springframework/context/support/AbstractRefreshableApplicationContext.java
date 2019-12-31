@@ -16,14 +16,14 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
@@ -126,14 +126,21 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
      */
     @Override
     protected final void refreshBeanFactory() throws BeansException {
+        // 判断是否已经存在 BeanFactory
         if (hasBeanFactory()) {
+            // 删除beans
             destroyBeans();
+            // 关闭 BeanFactory
             closeBeanFactory();
         }
         try {
+            // 创建一个 BeanFactory
             DefaultListableBeanFactory beanFactory = createBeanFactory();
+            // 设置唯一id
             beanFactory.setSerializationId(getId());
+            // 创建 定制的beanFactory
             customizeBeanFactory(beanFactory);
+            // 加载beanFactory
             loadBeanDefinitions(beanFactory);
             synchronized (this.beanFactoryMonitor) {
                 this.beanFactory = beanFactory;
@@ -167,6 +174,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
     /**
      * Determine whether this context currently holds a bean factory,
      * i.e. has been refreshed at least once and not been closed yet.
+     * 判断是否包含 BeanFactory
      */
     protected final boolean hasBeanFactory() {
         synchronized (this.beanFactoryMonitor) {
@@ -201,6 +209,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
      * with the {@linkplain #getInternalParentBeanFactory() internal bean factory} of this
      * context's parent as parent bean factory. Can be overridden in subclasses,
      * for example to customize DefaultListableBeanFactory's settings.
+     * <p>
+     * 创建beanFactory
      *
      * @return the bean factory for this context
      * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
@@ -209,6 +219,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
      * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
      */
     protected DefaultListableBeanFactory createBeanFactory() {
+        // 没有实现是一个null
         return new DefaultListableBeanFactory(getInternalParentBeanFactory());
     }
 
@@ -220,6 +231,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
      * and {@linkplain #setAllowCircularReferences "allowCircularReferences"} settings,
      * if specified. Can be overridden in subclasses to customize any of
      * {@link DefaultListableBeanFactory}'s settings.
+     * <p>
+     * 定制工厂
      *
      * @param beanFactory the newly created bean factory for this context
      * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding

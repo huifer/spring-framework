@@ -9,5 +9,6 @@ public class ContextLoadSourceCode {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         Person bean = context.getBean(Person.class);
         System.out.println(bean.getName());
+        System.out.println(bean.getApple().getName());
     }
 }

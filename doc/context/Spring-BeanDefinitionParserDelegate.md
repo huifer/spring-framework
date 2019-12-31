@@ -91,18 +91,6 @@
 
 ```
 
-![image-20191231162505748](assets/image-20191231162505748.png)
-
-其他的标签也同样的方式**`getAttribute`**获取
-
-思路: 
-
-1. 判断是否有这个标签
-   1. 有直接获取,设置值
-   2. 没有跳过
-
-
-
 
 
 ## parseBeanDefinitionAttributes
@@ -188,6 +176,18 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 ```
 
 
+![image-20191231162505748](assets/image-20191231162505748.png)
+
+其他的标签也同样的方式**`getAttribute`**获取
+
+思路: 
+
+1. 判断是否有这个标签
+   1. 有直接获取,设置值
+   2. 没有跳过
+
+
+
 
 ## parseMetaElements
 
@@ -216,6 +216,12 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 
 ```
 
+![image-20191231164622063](assets/image-20191231164622063.png)
+
+
+
+
+
 ## parseLookupOverrideSubElements
 
 ```java
@@ -240,6 +246,27 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
     }
 
 ```
+
+- 测试用例
+
+```xml
+    <bean id="personBean" class="com.huifer.source.spring.bean.Person" >
+        <property name="name" value="huifer"/>
+        <meta key="key" value="value"/>
+        <lookup-method name="getApple" bean="appleBean"/>
+    </bean>
+    <bean name="appleBean" class="com.huifer.source.spring.bean.Apple">
+        <property name="name" value="this is an apple !"/>
+    </bean>
+```
+
+![image-20191231165638975](assets/image-20191231165638975.png)
+
+
+
+
+
+
 
 ## parseReplacedMethodSubElements
 

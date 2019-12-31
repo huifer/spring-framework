@@ -57,12 +57,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     /**
      * Constant for the default scope name: {@code ""}, equivalent to singleton
      * status unless overridden from a parent bean definition (if applicable).
+     *
+     * 作用域: scope 信息
      */
     public static final String SCOPE_DEFAULT = "";
 
     /**
      * Constant that indicates no external autowiring at all.
      *
+     * 是否自动注入
      * @see #setAutowireMode
      */
     public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;

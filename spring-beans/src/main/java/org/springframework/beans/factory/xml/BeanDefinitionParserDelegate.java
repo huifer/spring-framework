@@ -449,6 +449,7 @@ public class BeanDefinitionParserDelegate {
             parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
             bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+            // 解析后都在操作 AbstractBeanDefinition 对象
             // 解析 meta 标签数据
             parseMetaElements(ele, bd);
             // 解析 {@code <lookup-method bean="personBean2"></lookup-method>}
@@ -678,7 +679,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
-     *解析{@code <lookup-method bean="personBean2"></lookup-method>}
+     * 解析{@code <lookup-method bean="personBean2"></lookup-method>}
      * Parse lookup-override sub-elements of the given bean element.
      */
     public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
@@ -687,8 +688,11 @@ public class BeanDefinitionParserDelegate {
             Node node = nl.item(i);
             if (isCandidateElement(node) && nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
                 Element ele = (Element) node;
+                // 方法名称:获取`name`变量值
                 String methodName = ele.getAttribute(NAME_ATTRIBUTE);
+                // 获取对象
                 String beanRef = ele.getAttribute(BEAN_ELEMENT);
+                // 转换成JAVA对象,注意这里的都是字符串不是clazz
                 LookupOverride override = new LookupOverride(methodName, beanRef);
                 override.setSource(extractSource(ele));
                 overrides.addOverride(override);
@@ -708,6 +712,7 @@ public class BeanDefinitionParserDelegate {
                 Element replacedMethodEle = (Element) node;
                 String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
                 String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
+                // 转换成JAVA对象
                 ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
                 // Look for arg-type match elements.
                 List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
@@ -743,6 +748,7 @@ public class BeanDefinitionParserDelegate {
                     try {
                         this.parseState.push(new ConstructorArgumentEntry(index));
                         Object value = parsePropertyValue(ele, bd, null);
+                        // 转换成JAVA对象
                         ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
                         if (StringUtils.hasLength(typeAttr)) {
                             valueHolder.setType(typeAttr);
@@ -788,6 +794,7 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * 解析 {@code <property name="" value=""/>}
      * Parse a property element.
      */
     public void parsePropertyElement(Element ele, BeanDefinition bd) {
@@ -803,6 +810,7 @@ public class BeanDefinitionParserDelegate {
                 return;
             }
             Object val = parsePropertyValue(ele, bd, propertyName);
+            // 转换JAVA 对象
             PropertyValue pv = new PropertyValue(propertyName, val);
             parseMetaElements(ele, pv);
             pv.setSource(extractSource(ele));
@@ -838,6 +846,7 @@ public class BeanDefinitionParserDelegate {
                     String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
                     String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
                     if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
+                        // 转换成JAVA对象
                         BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
                         attribute.setSource(extractSource(attributeEle));
                         qualifier.addMetadataAttribute(attribute);

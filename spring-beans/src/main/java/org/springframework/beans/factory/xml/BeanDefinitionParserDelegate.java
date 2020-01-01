@@ -830,26 +830,31 @@ public class BeanDefinitionParserDelegate {
      */
     public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
         String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
+        // 判断是否有类型
         if (!StringUtils.hasLength(typeName)) {
             error("Tag 'qualifier' must have a 'type' attribute", ele);
             return;
         }
+        // 创建并且放入 parseState
         this.parseState.push(new QualifierEntry(typeName));
         try {
             AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(typeName);
             qualifier.setSource(extractSource(ele));
             String value = ele.getAttribute(VALUE_ATTRIBUTE);
+            // 判断是否有值
             if (StringUtils.hasLength(value)) {
                 qualifier.setAttribute(AutowireCandidateQualifier.VALUE_KEY, value);
             }
+            // 下级节点
             NodeList nl = ele.getChildNodes();
             for (int i = 0; i < nl.getLength(); i++) {
                 Node node = nl.item(i);
                 if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
                     Element attributeEle = (Element) node;
-                    // 获取 下级biao'qia
+                    // 获取 下级标签<mate>解析
                     String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
                     String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
+                    // 判断是否有 key 和 value
                     if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
                         // 转换成JAVA对象
                         BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
@@ -857,6 +862,7 @@ public class BeanDefinitionParserDelegate {
                         qualifier.addMetadataAttribute(attribute);
                     }
                     else {
+                        // 没有抛出异常
                         error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
                         return;
                     }

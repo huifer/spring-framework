@@ -20,6 +20,7 @@ import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.util.Assert;
 
 /**
+ * {@code  <qualifier > } 注解的内容
  * Qualifier for resolving autowire candidates. A bean definition that
  * includes one or more such qualifiers enables fine-grained matching
  * against annotations on a field or parameter to be autowired.

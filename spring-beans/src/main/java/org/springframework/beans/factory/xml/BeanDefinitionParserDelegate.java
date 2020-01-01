@@ -715,6 +715,7 @@ public class BeanDefinitionParserDelegate {
                 // 转换成JAVA对象
                 ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
                 // Look for arg-type match elements.
+                // 参数解析 <arg-type match=""> 解析
                 List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
                 for (Element argTypeEle : argTypeEles) {
                     String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
@@ -738,6 +739,7 @@ public class BeanDefinitionParserDelegate {
         String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
         String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
         String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
+        // 判断是否存在 index 属性
         if (StringUtils.hasLength(indexAttr)) {
             try {
                 int index = Integer.parseInt(indexAttr);
@@ -746,6 +748,7 @@ public class BeanDefinitionParserDelegate {
                 }
                 else {
                     try {
+                        // ConstructorArgumentEntry 插入parseState
                         this.parseState.push(new ConstructorArgumentEntry(index));
                         Object value = parsePropertyValue(ele, bd, null);
                         // 转换成JAVA对象
@@ -757,6 +760,7 @@ public class BeanDefinitionParserDelegate {
                             valueHolder.setName(nameAttr);
                         }
                         valueHolder.setSource(extractSource(ele));
+                        // 不允许重复指定相同参数
                         if (bd.getConstructorArgumentValues().hasIndexedArgumentValue(index)) {
                             error("Ambiguous constructor-arg entries for index " + index, ele);
                         }
@@ -843,6 +847,7 @@ public class BeanDefinitionParserDelegate {
                 Node node = nl.item(i);
                 if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
                     Element attributeEle = (Element) node;
+                    // 获取 下级biao'qia
                     String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
                     String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
                     if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
@@ -879,6 +884,7 @@ public class BeanDefinitionParserDelegate {
         Element subElement = null;
         for (int i = 0; i < nl.getLength(); i++) {
             Node node = nl.item(i);
+            //  不处理  element 节点名称 = description 和 meta
             if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
                     !nodeNameEquals(node, META_ELEMENT)) {
                 // Child element is what we're looking for.
@@ -891,14 +897,18 @@ public class BeanDefinitionParserDelegate {
             }
         }
 
+        // 判断是否存在 ref 属性
         boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
+        // 判断是否 value 属性
         boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
+        // 判断1:  ref属性存在 value 属性 或者 ref 和 value 有一个存在并且有 下级节点 抛出异常
         if ((hasRefAttribute && hasValueAttribute) ||
                 ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
             error(elementName +
                     " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
         }
 
+        // 判断2: 存在 ref 返回 ref 的值
         if (hasRefAttribute) {
             String refName = ele.getAttribute(REF_ATTRIBUTE);
             if (!StringUtils.hasText(refName)) {
@@ -908,15 +918,18 @@ public class BeanDefinitionParserDelegate {
             ref.setSource(extractSource(ele));
             return ref;
         }
+        // 判断3: 存在 value 返回 value 的值
         else if (hasValueAttribute) {
             TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
             valueHolder.setSource(extractSource(ele));
             return valueHolder;
         }
         else if (subElement != null) {
+            // 下级标签解析
             return parsePropertySubElement(subElement, bd);
         }
         else {
+            // 没有抛出异常
             // Neither child element nor "ref" or "value" attribute found.
             error(elementName + " must specify a ref or value", ele);
             return null;

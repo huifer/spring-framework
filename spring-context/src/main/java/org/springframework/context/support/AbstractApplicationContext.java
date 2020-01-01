@@ -538,6 +538,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
             // Prepare the bean factory for use in this context.
             // 准备beanFactory 对下文使用
+            // todo: 2020/1/1 下一个解析目标
             prepareBeanFactory(beanFactory);
 
             try {

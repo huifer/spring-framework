@@ -3,15 +3,19 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="personBean" class="com.huifer.source.spring.bean.Person" >
+    <bean id="personBean" class="com.huifer.source.spring.bean.Person">
         <property name="name" value="huifer"/>
         <meta key="key" value="value"/>
         <lookup-method name="getApple" bean="appleBean"/>
-        <replaced-method name="dis" replacer="rc"/>
+        <replaced-method name="dis" replacer="rcBean"/>
+        <constructor-arg name="age" value="10"/>
     </bean>
-<!--    <bean name="rc" class=""/>-->
+    <!--    替换方法-->
+    <bean name="rcBean" class="com.huifer.source.spring.bean.Rc"/>
+
     <bean name="appleBean" class="com.huifer.source.spring.bean.Apple">
         <property name="name" value="this is an apple !"/>
     </bean>
+
 
 </beans>

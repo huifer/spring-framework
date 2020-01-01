@@ -81,7 +81,7 @@
 
 
 
-## 测试用例
+### 测试用例
 
 ```xml
     <bean id="personBean" class="com.huifer.source.spring.bean.Person" scope="prototype">
@@ -247,7 +247,7 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 
 ```
 
-- 测试用例
+### 测试用例
 
 ```xml
     <bean id="personBean" class="com.huifer.source.spring.bean.Person" >
@@ -271,6 +271,10 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 ## parseReplacedMethodSubElements
 
 ```java
+    /**
+     * {@code <replaced-method name="" replacer=""/>}
+     * Parse replaced-method sub-elements of the given bean element.
+     */
     public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
         NodeList nl = beanEle.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
@@ -282,6 +286,7 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
                 // 转换成JAVA对象
                 ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
                 // Look for arg-type match elements.
+                // 参数解析 <arg-type match=""> 解析
                 List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
                 for (Element argTypeEle : argTypeEles) {
                     String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
@@ -297,6 +302,46 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
     }
 
 ```
+
+### 测试用例
+
+  编写方法`dis`
+
+```java
+public class Person {
+    private String name;
+    private Apple apple;
+    private Integer age;
+
+    public void dis() {
+        System.out.println("dis");
+    }
+}
+```
+
+​	编写一个替换`dis`方法的类
+
+```java
+public class Rc implements MethodReplacer {
+    @Override
+    public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
+        System.out.println("替换原来的方法");
+        return null;
+    }
+}
+```
+
+xml 配置
+
+```java
+        <replaced-method name="dis" replacer="rcBean"/>
+        <bean name="rcBean" class="com.huifer.source.spring.bean.Rc"/>
+
+```
+
+![image-20200101093742238](assets/image-20200101093742238.png)
+
+
 
 
 
@@ -315,6 +360,178 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 
 ```
 
+```java
+    /**
+     * 解析 constructor-arg 元素
+     * {@code <constructor-arg name="" value="" index="" ref="" type="" />}
+     * Parse a constructor-arg element.
+     */
+    public void parseConstructorArgElement(Element ele, BeanDefinition bd) {
+        String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+        String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
+        String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
+        // 判断是否存在 index 属性
+        if (StringUtils.hasLength(indexAttr)) {
+            try {
+                int index = Integer.parseInt(indexAttr);
+                if (index < 0) {
+                    error("'index' cannot be lower than 0", ele);
+                }
+                else {
+                    try {
+                        // ConstructorArgumentEntry 插入parseState
+                        this.parseState.push(new ConstructorArgumentEntry(index));
+                        Object value = parsePropertyValue(ele, bd, null);
+                        // 转换成JAVA对象
+                        ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
+                        if (StringUtils.hasLength(typeAttr)) {
+                            valueHolder.setType(typeAttr);
+                        }
+                        if (StringUtils.hasLength(nameAttr)) {
+                            valueHolder.setName(nameAttr);
+                        }
+                        valueHolder.setSource(extractSource(ele));
+                        // 不允许重复指定相同参数
+                        if (bd.getConstructorArgumentValues().hasIndexedArgumentValue(index)) {
+                            error("Ambiguous constructor-arg entries for index " + index, ele);
+                        }
+                        else {
+                            bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
+                        }
+                    }
+                    finally {
+                        this.parseState.pop();
+                    }
+                }
+            }
+            catch (NumberFormatException ex) {
+                error("Attribute 'index' of tag 'constructor-arg' must be an integer", ele);
+            }
+        }
+        else {
+            try {
+                this.parseState.push(new ConstructorArgumentEntry());
+                Object value = parsePropertyValue(ele, bd, null);
+                ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
+                if (StringUtils.hasLength(typeAttr)) {
+                    valueHolder.setType(typeAttr);
+                }
+                if (StringUtils.hasLength(nameAttr)) {
+                    valueHolder.setName(nameAttr);
+                }
+                valueHolder.setSource(extractSource(ele));
+                bd.getConstructorArgumentValues().addGenericArgumentValue(valueHolder);
+            }
+            finally {
+                this.parseState.pop();
+            }
+        }
+    }
+
+```
+
+```JAVA
+    /**
+     * Get the value of a property element. May be a list etc.
+     * Also used for constructor arguments, "propertyName" being null in this case.
+     */
+    @Nullable
+    public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
+        String elementName = (propertyName != null ?
+                "<property> element for property '" + propertyName + "'" :
+                "<constructor-arg> element");
+
+        // Should only have one child element: ref, value, list, etc.
+        NodeList nl = ele.getChildNodes();
+        Element subElement = null;
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node node = nl.item(i);
+            //  不处理  element 节点名称 = description 和 meta
+            if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+                    !nodeNameEquals(node, META_ELEMENT)) {
+                // Child element is what we're looking for.
+                if (subElement != null) {
+                    error(elementName + " must not contain more than one sub-element", ele);
+                }
+                else {
+                    subElement = (Element) node;
+                }
+            }
+        }
+
+        // 判断是否存在 ref 属性
+        boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
+        // 判断是否 value 属性
+        boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
+        // 判断1:  ref属性存在 value 属性 或者 ref 和 value 有一个存在并且有 下级节点 抛出异常
+        if ((hasRefAttribute && hasValueAttribute) ||
+                ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
+            error(elementName +
+                    " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
+        }
+
+        // 判断2: 存在 ref 返回 ref 的值
+        if (hasRefAttribute) {
+            String refName = ele.getAttribute(REF_ATTRIBUTE);
+            if (!StringUtils.hasText(refName)) {
+                error(elementName + " contains empty 'ref' attribute", ele);
+            }
+            RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+            ref.setSource(extractSource(ele));
+            return ref;
+        }
+        // 判断3: 存在 value 返回 value 的值
+        else if (hasValueAttribute) {
+            TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
+            valueHolder.setSource(extractSource(ele));
+            return valueHolder;
+        }
+        else if (subElement != null) {
+            // 下级标签解析
+            return parsePropertySubElement(subElement, bd);
+        }
+        else {
+            // 没有抛出异常
+            // Neither child element nor "ref" or "value" attribute found.
+            error(elementName + " must specify a ref or value", ele);
+            return null;
+        }
+    }
+
+```
+
+
+
+### 测试用例
+
+- 编辑构造函数
+
+  ```java
+  public class Person {
+      private String name;
+      private Apple apple;
+      private Integer age;
+  
+      public Person() {
+      }
+  
+      public Person(Integer age) {
+          this.age = age;
+      }
+  
+  ```
+
+- 添加配置
+
+  ```xml
+          <constructor-arg name="age" value="10"/>
+  
+  ```
+
+
+
+![image-20200101100906778](assets/image-20200101100906778.png)
+
 
 
 ## parsePropertyElements
@@ -330,6 +547,51 @@ public void parsePropertyElements(Element beanEle, BeanDefinition bd) {
         }
     }
 ```
+
+```java
+    /**
+     * 解析 {@code <property name="" value=""/>}
+     * Parse a property element.
+     */
+    public void parsePropertyElement(Element ele, BeanDefinition bd) {
+        String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
+        if (!StringUtils.hasLength(propertyName)) {
+            error("Tag 'property' must have a 'name' attribute", ele);
+            return;
+        }
+        this.parseState.push(new PropertyEntry(propertyName));
+        try {
+            if (bd.getPropertyValues().contains(propertyName)) {
+                error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
+                return;
+            }
+            Object val = parsePropertyValue(ele, bd, propertyName);
+            // 转换JAVA 对象
+            PropertyValue pv = new PropertyValue(propertyName, val);
+            parseMetaElements(ele, pv);
+            pv.setSource(extractSource(ele));
+            bd.getPropertyValues().addPropertyValue(pv);
+        }
+        finally {
+            this.parseState.pop();
+        }
+    }
+
+```
+
+### 测试用例
+
+xml
+
+```xml
+ <bean id="personBean" class="com.huifer.source.spring.bean.Person">
+        <property name="name" value="huifer"/>
+    </bean>
+```
+
+
+
+![image-20200101111755022](assets/image-20200101111755022.png)
 
 
 
@@ -347,3 +609,182 @@ public void parseQualifierElements(Element beanEle, AbstractBeanDefinition bd) {
     }
 ```
 
+```java
+    /**
+     * Parse a qualifier element.
+     */
+    public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
+        String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
+        // 判断是否有类型
+        if (!StringUtils.hasLength(typeName)) {
+            error("Tag 'qualifier' must have a 'type' attribute", ele);
+            return;
+        }
+        // 创建并且放入 parseState
+        this.parseState.push(new QualifierEntry(typeName));
+        try {
+            AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(typeName);
+            qualifier.setSource(extractSource(ele));
+            String value = ele.getAttribute(VALUE_ATTRIBUTE);
+            // 判断是否有值
+            if (StringUtils.hasLength(value)) {
+                qualifier.setAttribute(AutowireCandidateQualifier.VALUE_KEY, value);
+            }
+            // 下级节点
+            NodeList nl = ele.getChildNodes();
+            for (int i = 0; i < nl.getLength(); i++) {
+                Node node = nl.item(i);
+                if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
+                    Element attributeEle = (Element) node;
+                    // 获取 下级biao'qia
+                    String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
+                    String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
+                    // 判断是否有 key 和 value
+                    if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
+                        // 转换成JAVA对象
+                        BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
+                        attribute.setSource(extractSource(attributeEle));
+                        qualifier.addMetadataAttribute(attribute);
+                    }
+                    else {
+                        // 没有抛出异常
+                        error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
+                        return;
+                    }
+                }
+            }
+            bd.addQualifier(qualifier);
+        }
+        finally {
+            this.parseState.pop();
+        }
+    }
+
+```
+
+
+
+### 测试用例
+
+- 编写一个注解
+
+```java
+/**
+ * 在spring-config.xml中配置 ,使用时通过 status + quality 来引入具体的bean
+ */
+@Target({ElementType.FIELD, ElementType.METHOD,
+        ElementType.TYPE, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface PersonQualifier {
+
+    String status();
+
+    String quality();
+} 
+```
+
+```JAVA
+public class PersonS {
+    private String personName;
+
+    public String getPersonName() {
+        return personName;
+    }
+
+    public void setPersonName(String personName) {
+        this.personName = personName;
+    }
+} 
+```
+
+```JAVA
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class PersonService {
+    @Autowired
+//    @PersonQualifier(status = "status_teacher", quality = "quality_teacher")
+    @PersonQualifier(status = "status_student", quality = "quality_student")
+    private PersonS personS;
+
+    public PersonS getPerson() {
+        return personS;
+    }
+
+    public void setPerson(PersonS person) {
+        this.personS = person;
+    }
+} 
+```
+
+```JAVA
+public class Student extends PersonS {
+    private String stdLocation;
+
+    public String getStdLocation() {
+        return stdLocation;
+    }
+
+    public void setStdLocation(String stdLocation) {
+        this.stdLocation = stdLocation;
+    }
+}
+```
+
+```JAVA
+public class Teacher extends PersonS {
+    private String subject;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+} 
+```
+
+```JAVA
+public class QualifierSourceCode {
+    public static void main(String[] args) {
+        AbstractApplicationContext context = new ClassPathXmlApplicationContext("QualifierSourceCode-beans.xml");
+        PersonService service = context.getBean(PersonService.class);
+        System.out.println(service.getPerson().getPersonName());
+        context.close();
+    }
+}
+
+```
+
+```XML
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+    <context:annotation-config/>
+
+    <context:annotation-config/>
+    <bean class="com.huifer.source.spring.qualifier.PersonService"/>
+
+    <bean class="com.huifer.source.spring.qualifier.Student">
+        <qualifier type="com.huifer.source.spring.qualifier.PersonQualifier">
+            <attribute key="status" value="status_student"/>
+            <attribute key="quality" value="quality_student"/>
+        </qualifier>
+        <property name="personName" value="Student sName"/>
+    </bean>
+
+    <bean class="com.huifer.source.spring.qualifier.Teacher">
+        <qualifier type="com.huifer.source.spring.qualifier.PersonQualifier">
+            <attribute key="status" value="status_teacher"/>
+            <attribute key="quality" value="quality_teacher"/>
+        </qualifier>
+        <property name="personName" value="Teacher tName"/>
+    </bean>
+</beans>
+```
+
+![image-20200101155539501](assets/image-20200101155539501.png)

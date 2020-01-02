@@ -253,7 +253,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
         }
         else {
             // Can only load single resources by absolute URL.
+            // 返回单个资源对象
             Resource resource = resourceLoader.getResource(location);
+            // 资源中存在多少个bean定义
             int count = loadBeanDefinitions(resource);
             if (actualResources != null) {
                 actualResources.add(resource);

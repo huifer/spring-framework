@@ -54,6 +54,7 @@ public interface ReaderEventListener extends EventListener {
 
     /**
      * Notification that the given import has been processed.
+     * 通知import 处理结果
      *
      * @param importDefinition a descriptor for the import
      */

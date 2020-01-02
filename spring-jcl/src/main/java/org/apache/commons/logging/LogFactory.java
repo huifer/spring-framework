@@ -45,6 +45,9 @@ package org.apache.commons.logging;
  * or SLF4J or {@code java.util.logging}.</b> Simply put Log4j 2.x or Logback
  * (or another SLF4J provider) onto your classpath, without any extra bridges,
  * and let the framework auto-adapt to your choice.
+ * <p>
+ * <p>
+ * // todo: 2020/1/2 日志工厂
  *
  * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0

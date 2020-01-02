@@ -57,15 +57,16 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     /**
      * Constant for the default scope name: {@code ""}, equivalent to singleton
      * status unless overridden from a parent bean definition (if applicable).
-     *
+     * <p>
      * 作用域: scope 信息
      */
     public static final String SCOPE_DEFAULT = "";
 
     /**
      * Constant that indicates no external autowiring at all.
-     *
+     * <p>
      * 是否自动注入
+     *
      * @see #setAutowireMode
      */
     public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;
@@ -144,6 +145,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
      */
     public static final String INFER_METHOD = "(inferred)";
     private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
+    /**
+     * bean 的class
+     */
     @Nullable
     private volatile Object beanClass;
     @Nullable
@@ -169,12 +173,21 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     @Nullable
     private String factoryMethodName;
 
+    /**
+     * {@code <constructor-arg name="age" value="10"/>} 解析结果
+     */
     @Nullable
     private ConstructorArgumentValues constructorArgumentValues;
 
+    /**
+     * {@code <property>}标签解析结果
+     */
     @Nullable
     private MutablePropertyValues propertyValues;
 
+    /**
+     * {@code <lookup-method>} 和{@link <replaced-method>} 解析结果
+     */
     private MethodOverrides methodOverrides = new MethodOverrides();
 
     @Nullable
@@ -194,6 +207,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     @Nullable
     private String description;
 
+    /**
+     * xml 文件
+     */
     @Nullable
     private Resource resource;
 

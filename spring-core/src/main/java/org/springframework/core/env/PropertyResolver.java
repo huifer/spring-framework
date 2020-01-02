@@ -114,7 +114,7 @@ public interface PropertyResolver {
      * property values as resolved by {@link #getProperty}. Unresolvable placeholders with
      * no default value will cause an IllegalArgumentException to be thrown.
      * <p>
-     * 解析占位符
+     * 解析占位符 ${...}
      *
      * @return the resolved String (never {@code null})
      * @throws IllegalArgumentException if given text is {@code null}

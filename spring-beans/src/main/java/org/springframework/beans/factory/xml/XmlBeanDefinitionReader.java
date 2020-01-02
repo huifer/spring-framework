@@ -295,17 +295,22 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         if (logger.isTraceEnabled()) {
             logger.trace("Loading XML bean definitions from " + encodedResource);
         }
-
+        //  获取已加载过的资源
         Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
         if (currentResources == null) {
             currentResources = new HashSet<>(4);
             this.resourcesCurrentlyBeingLoaded.set(currentResources);
         }
+        // 加入当前资源,如果存在抛出异常
         if (!currentResources.add(encodedResource)) {
             throw new BeanDefinitionStoreException(
                     "Detected cyclic loading of " + encodedResource + " - check your import definitions!");
         }
         try {
+            /**
+             * encodedResource.getResource():获取封装的资源对象,
+             * getInputStream(): 获取输入流
+             */
             InputStream inputStream = encodedResource.getResource().getInputStream();
             try {
                 InputSource inputSource = new InputSource(inputStream);
@@ -413,7 +418,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * @param inputSource the SAX InputSource to read from
      *                    输入流
      * @param resource    the resource descriptor for the XML file
-     *                      xml的文件资源
+     *                    xml的文件资源
      * @return the DOM Document ,xml 解析结果
      * @throws Exception when thrown from the DocumentLoader
      * @see #setDocumentLoader

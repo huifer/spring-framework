@@ -122,6 +122,8 @@ public abstract class ResourceUtils {
     /**
      * Return whether the given resource location is a URL:
      * either a special "classpath" pseudo URL or a standard URL.
+     * <p>
+     * 判断是否是一个URL 根据 classpath: 开头判断
      *
      * @param resourceLocation the location String to check
      * @return whether the location qualifies as a URL

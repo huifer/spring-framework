@@ -35,6 +35,8 @@ public abstract class ResourcePatternUtils {
     /**
      * Return whether the given resource location is a URL: either a
      * special "classpath" or "classpath*" pseudo URL or a standard URL.
+     * <p>
+     * 判断是否为url,其中classpath和classpath*开头的是一个伪URL
      *
      * @param resourceLocation the location String to check
      * @return whether the location qualifies as a URL
@@ -44,6 +46,7 @@ public abstract class ResourcePatternUtils {
      * @see java.net.URL
      */
     public static boolean isUrl(@Nullable String resourceLocation) {
+        // 判断是否是 classpath*: 开头
         return (resourceLocation != null &&
                 (resourceLocation.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX) ||
                         ResourceUtils.isUrl(resourceLocation)));

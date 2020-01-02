@@ -321,22 +321,32 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     }
 
     /**
+     * 解析 {@code <alias>}
      * Process the given alias element, registering the alias with the registry.
      */
     protected void processAliasRegistration(Element ele) {
+        // 获取 name 属性
         String name = ele.getAttribute(NAME_ATTRIBUTE);
+        // 获取  alias 属性
         String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
         boolean valid = true;
+        // 判断是否有 name 属性
         if (!StringUtils.hasText(name)) {
             getReaderContext().error("Name must not be empty", ele);
             valid = false;
         }
+        // 判断是否有 alias 属性
         if (!StringUtils.hasText(alias)) {
             getReaderContext().error("Alias must not be empty", ele);
             valid = false;
         }
         if (valid) {
             try {
+                /**
+                 * 1. getReaderContext(): 获取 {@link XmlReaderContext}
+                 * 2. getRegistry(): 获取{@link BeanDefinitionRegistry} 获取注册器
+                 * 3. registerAlias(): 别名注册 {@link org.springframework.core.SimpleAliasRegistry#registerAlias(String, String)}
+                 */
                 getReaderContext().getRegistry().registerAlias(name, alias);
             }
             catch (Exception ex) {

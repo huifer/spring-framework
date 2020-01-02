@@ -30,18 +30,32 @@ import java.util.logging.LogRecord;
 /**
  * Spring's common JCL adapter behind {@link LogFactory} and {@link LogFactoryService}.
  * Detects the presence of Log4j 2.x / SLF4J, falling back to {@code java.util.logging}.
+ * <p>
+ * <p>
+ * 该类包含多个实现{@link Log4jAdapter} {@link Log4jLog}...
  *
  * @author Juergen Hoeller
  * @since 5.1
  */
 final class LogAdapter {
-
+    /**
+     * log4j 日志接口
+     */
     private static final String LOG4J_SPI = "org.apache.logging.log4j.spi.ExtendedLogger";
 
+    /**
+     *
+     */
     private static final String LOG4J_SLF4J_PROVIDER = "org.apache.logging.slf4j.SLF4JProvider";
 
+    /**
+     *
+     */
     private static final String SLF4J_SPI = "org.slf4j.spi.LocationAwareLogger";
 
+    /**
+     * slf4j 日志
+     */
     private static final String SLF4J_API = "org.slf4j.Logger";
 
 
@@ -81,12 +95,16 @@ final class LogAdapter {
 
     /**
      * Create an actual {@link Log} instance for the selected API.
+     * <p>
+     * 创建日志
      *
      * @param name the logger name
      */
     public static Log createLog(String name) {
+        // 创建不同的日志处理器
         switch (logApi) {
             case LOG4J:
+                // LOG4J
                 return Log4jAdapter.createLog(name);
             case SLF4J_LAL:
                 return Slf4jAdapter.createLocationAwareLog(name);
@@ -105,6 +123,7 @@ final class LogAdapter {
 
     private static boolean isPresent(String className) {
         try {
+            // 加载类
             Class.forName(className, false, LogAdapter.class.getClassLoader());
             return true;
         }
@@ -114,11 +133,20 @@ final class LogAdapter {
     }
 
 
+    /**
+     * 日志种类枚举
+     */
     private enum LogApi {LOG4J, SLF4J_LAL, SLF4J, JUL}
 
 
     private static class Log4jAdapter {
 
+        /**
+         * 创建日志
+         *
+         * @param name
+         * @return
+         */
         public static Log createLog(String name) {
             return new Log4jLog(name);
         }
@@ -482,6 +510,11 @@ final class LogAdapter {
 
         private transient java.util.logging.Logger logger;
 
+        /**
+         * java 的日志
+         *
+         * @param name
+         */
         public JavaUtilLog(String name) {
             this.name = name;
             this.logger = java.util.logging.Logger.getLogger(name);

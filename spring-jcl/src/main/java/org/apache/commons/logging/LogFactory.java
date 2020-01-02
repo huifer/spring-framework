@@ -47,7 +47,6 @@ package org.apache.commons.logging;
  * and let the framework auto-adapt to your choice.
  * <p>
  * <p>
- * // todo: 2020/1/2 日志工厂
  *
  * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0

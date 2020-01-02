@@ -23,6 +23,7 @@ import java.io.Serializable;
 /**
  * Trivial implementation of {@link Log} that throws away all messages.
  *
+ * 空实现
  * @author Juergen Hoeller (for the {@code spring-jcl} variant)
  * @since 5.0
  */

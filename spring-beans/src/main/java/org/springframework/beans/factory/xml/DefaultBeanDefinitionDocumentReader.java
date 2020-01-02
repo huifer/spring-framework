@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -151,9 +152,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
         // 啥也没干
         preProcessXml(root);
-        //
+        // 解析bean的定义
         parseBeanDefinitions(root, this.delegate);
-        //
+        // 啥也没干
         postProcessXml(root);
 
         this.delegate = parent;
@@ -203,46 +204,63 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     }
 
     /**
-     * 解析不同类型的标签
+     * 解析不同类型的标签,解析标签如下
+     * {@code <import>},{@code <alias>},{@code <bean>},{@code <beans>}
      *
      * @param ele
      * @param delegate
      */
     private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
         if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+            //  import 标签解析
             importBeanDefinitionResource(ele);
         }
         else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
+            // alias 标签解析
             processAliasRegistration(ele);
         }
         else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
+            // bean 标签解析
             processBeanDefinition(ele, delegate);
         }
         else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
+            // beans 标签解析
             // recurse
             doRegisterBeanDefinitions(ele);
         }
     }
 
     /**
+     * 解析{@code <import>} 标签
      * Parse an "import" element and load the bean definitions
      * from the given resource into the bean factory.
      */
     protected void importBeanDefinitionResource(Element ele) {
+        // 获取 resource 属性
         String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+        // 是否有 resource 属性
         if (!StringUtils.hasText(location)) {
             getReaderContext().error("Resource location must not be empty", ele);
             return;
         }
 
         // Resolve system properties: e.g. "${user.dir}"
+        // 获取系统环境,解析路径
+        /**
+         * 1. getReaderContext() 获取{@link XmlReaderContext}
+         * 2. getEnvironment() 获取环境
+         * 3. resolveRequiredPlaceholders(location) 解析占位符${...}
+         */
         location = getReaderContext().getEnvironment().resolveRequiredPlaceholders(location);
 
+        // 资源存放集合
         Set<Resource> actualResources = new LinkedHashSet<>(4);
 
         // Discover whether the location is an absolute or relative URI
+        // 相对路径 绝对路径的判断
         boolean absoluteLocation = false;
         try {
+            // 判断是相对路径还是绝对路径
             absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
         }
         catch (URISyntaxException ex) {
@@ -253,6 +271,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
         // Absolute or relative?
         if (absoluteLocation) {
             try {
+                // 获取import中的数量
                 int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
                 if (logger.isTraceEnabled()) {
                     logger.trace("Imported " + importCount + " bean definitions from URL location [" + location + "]");
@@ -267,9 +286,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
             // No URL -> considering resource location as relative to the current file.
             try {
                 int importCount;
+                // 本地地址
                 Resource relativeResource = getReaderContext().getResource().createRelative(location);
                 if (relativeResource.exists()) {
+                    // 此处调用方式和加载一个xml文件相同
                     importCount = getReaderContext().getReader().loadBeanDefinitions(relativeResource);
+
                     actualResources.add(relativeResource);
                 }
                 else {
@@ -289,7 +311,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
                         "Failed to import bean definitions from relative location [" + location + "]", ele, ex);
             }
         }
+        // 转换数组
         Resource[] actResArray = actualResources.toArray(new Resource[0]);
+        /***
+         * fireImportProcessed()触发import事件,
+         * 并且通过{@link org.springframework.beans.factory.parsing.ReaderEventListener#importProcessed(ImportDefinition)} 宣布处理结果
+         */
         getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
     }
 

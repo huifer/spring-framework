@@ -88,6 +88,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * version of {@code getBean(Class, args)} and {@code getBean(String, args)},
  * See {@link Lookup @Lookup's javadoc} for details.
  *
+ *
+ * 注解的解析{@link Autowired} \ {@link Value}
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Stephane Nicoll

@@ -54,10 +54,16 @@ import java.util.*;
  */
 public class BeanDefinitionParserDelegate {
 
+    /**
+     * xml 的namespace
+     */
     public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
     public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
 
+    /**
+     * 标签内容
+     */
     /**
      * Value of a T/F attribute that represents true.
      * Anything else represents false. Case seNsItive.

@@ -253,6 +253,7 @@ public interface BeanFactory {
      * return value from this method does not necessarily indicate that {@link #getBean}
      * will be able to obtain an instance for the same name.
      *
+     * 是否存在bean
      * @param name the name of the bean to query
      * @return whether a bean with the given name is present
      */
@@ -319,6 +320,8 @@ public interface BeanFactory {
      * would return an object that is assignable to the specified target type.
      * <p>Translates aliases back to the corresponding canonical bean name.
      * Will ask the parent factory if the bean cannot be found in this factory instance.
+     * <p>
+     * 判断类型是否相同
      *
      * @param name        the name of the bean to query
      * @param typeToMatch the type to match against (as a {@code Class})
@@ -338,6 +341,8 @@ public interface BeanFactory {
      * as exposed by {@link FactoryBean#getObjectType()}.
      * <p>Translates aliases back to the corresponding canonical bean name.
      * Will ask the parent factory if the bean cannot be found in this factory instance.
+     * <p>
+     * 获取类型class
      *
      * @param name the name of the bean to query
      * @return the type of the bean, or {@code null} if not determinable
@@ -356,6 +361,8 @@ public interface BeanFactory {
      * and other aliases (if any) will be returned, with the original bean name
      * being the first element in the array.
      * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+     * <p>
+     * 获取别名列表
      *
      * @param name the bean name to check for aliases
      * @return the aliases, or an empty array if none

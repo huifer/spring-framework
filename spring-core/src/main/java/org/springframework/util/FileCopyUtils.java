@@ -27,6 +27,8 @@ import java.nio.file.Files;
  * methods from this class that leave streams open can be found in {@link StreamUtils}.
  *
  * <p>Mainly for use within the framework, but also useful for application code.
+ * <p>
+ * 文件工具类
  *
  * @author Juergen Hoeller
  * @see StreamUtils

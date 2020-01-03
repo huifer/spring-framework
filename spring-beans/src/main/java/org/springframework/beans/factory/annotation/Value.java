@@ -38,6 +38,8 @@ import java.lang.annotation.*;
  * types. Please consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
+ *
+ * 属性值注解
  * @author Juergen Hoeller
  * @see AutowiredAnnotationBeanPostProcessor
  * @see Autowired

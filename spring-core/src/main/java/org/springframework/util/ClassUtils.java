@@ -28,6 +28,8 @@ import java.util.*;
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
  * Mainly for internal use within the framework.
+ * <p>
+ * 框架内部使用, 类工具,反射相关
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -44,6 +46,7 @@ public abstract class ClassUtils {
      */
     public static final String ARRAY_SUFFIX = "[]";
     /**
+     * CGLIB 代理前缀
      * The CGLIB class separator: {@code "$$"}.
      */
     public static final String CGLIB_CLASS_SEPARATOR = "$$";
@@ -74,18 +77,24 @@ public abstract class ClassUtils {
     /**
      * Map with primitive wrapper type as key and corresponding primitive
      * type as value, for example: Integer.class -> int.class.
+     * <p>
+     * 包装类 -> 基础类型
      */
     private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(8);
 
     /**
      * Map with primitive type as key and corresponding wrapper
      * type as value, for example: int.class -> Integer.class.
+     * <p>
+     * 基础类型 -> 包装类
      */
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
 
     /**
      * Map with primitive type name as key and corresponding primitive
      * type as value, for example: "int" -> "int.class".
+     * <p>
+     * 字符串 -> 基础类型
      */
     private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<>(32);
 
@@ -102,6 +111,9 @@ public abstract class ClassUtils {
     private static final Set<Class<?>> javaLanguageInterfaces;
 
 
+    /**
+     * 静态代码块 , 放入了一些常量如基础类型变脸
+     */
     static {
         primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
         primitiveWrapperTypeMap.put(Byte.class, byte.class);
@@ -162,6 +174,8 @@ public abstract class ClassUtils {
      * for example, for class path resource loading (but not necessarily for
      * {@code Class.forName}, which accepts a {@code null} ClassLoader
      * reference as well).
+     * <p>
+     * 获取默认的 classLoad,这里的 {@link ClassLoader} 是JVM提供
      *
      * @return the default ClassLoader (only {@code null} if even the system
      * ClassLoader isn't accessible)

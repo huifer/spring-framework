@@ -24,6 +24,8 @@ import java.util.*;
 /**
  * Miscellaneous collection utility methods.
  * Mainly for internal use within the framework.
+ * <p>
+ * 集合工具类
  *
  * @author Juergen Hoeller
  * @author Rob Harrop

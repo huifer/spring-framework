@@ -94,6 +94,7 @@ import org.springframework.lang.Nullable;
  * <li>a custom destroy-method definition
  * </ol>
  *
+ * bean工厂
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -120,6 +121,8 @@ public interface BeanFactory {
      * beans <i>created</i> by the FactoryBean. For example, if the bean named
      * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
      * will return the factory, not the instance returned by the factory.
+     *
+     * 工厂bean前缀区分作用
      */
     String FACTORY_BEAN_PREFIX = "&";
 
@@ -132,6 +135,7 @@ public interface BeanFactory {
      * <p>Translates aliases back to the corresponding canonical bean name.
      * Will ask the parent factory if the bean cannot be found in this factory instance.
      *
+     * 获取一个bean
      * @param name the name of the bean to retrieve
      * @return an instance of the bean
      * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
@@ -148,6 +152,7 @@ public interface BeanFactory {
      * <p>Translates aliases back to the corresponding canonical bean name.
      * Will ask the parent factory if the bean cannot be found in this factory instance.
      *
+     * 获取一个bean
      * @param name         the name of the bean to retrieve
      * @param requiredType type the bean must match; can be an interface or superclass
      * @return an instance of the bean
@@ -162,6 +167,7 @@ public interface BeanFactory {
      * <p>Allows for specifying explicit constructor arguments / factory method arguments,
      * overriding the specified default arguments (if any) in the bean definition.
      *
+     * 获取一个bean
      * @param name the name of the bean to retrieve
      * @param args arguments to use when creating a bean instance using explicit arguments
      *             (only applied when creating a new instance as opposed to retrieving an existing one)
@@ -181,6 +187,7 @@ public interface BeanFactory {
      * of the given type. For more extensive retrieval operations across sets of beans,
      * use {@link ListableBeanFactory} and/or {@link BeanFactoryUtils}.
      *
+     * 获取一个bean
      * @param requiredType type the bean must match; can be an interface or superclass
      * @return an instance of the single bean matching the required type
      * @throws NoSuchBeanDefinitionException   if no bean of the given type was found
@@ -200,6 +207,7 @@ public interface BeanFactory {
      * of the given type. For more extensive retrieval operations across sets of beans,
      * use {@link ListableBeanFactory} and/or {@link BeanFactoryUtils}.
      *
+     * 获取一个bean
      * @param requiredType type the bean must match; can be an interface or superclass
      * @param args         arguments to use when creating a bean instance using explicit arguments
      *                     (only applied when creating a new instance as opposed to retrieving an existing one)

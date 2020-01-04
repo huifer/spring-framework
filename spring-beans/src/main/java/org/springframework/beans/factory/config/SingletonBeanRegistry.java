@@ -26,6 +26,8 @@ import org.springframework.lang.Nullable;
  *
  * <p>The {@link ConfigurableBeanFactory} interface extends this interface.
  *
+ *
+ * 单例bean注册接口,默认实现{@Link org.springframework.beans.factory.support.DefaultSingletonBeanRegistry}
  * @author Juergen Hoeller
  * @see ConfigurableBeanFactory
  * @see org.springframework.beans.factory.support.DefaultSingletonBeanRegistry
@@ -49,6 +51,8 @@ public interface SingletonBeanRegistry {
      * for runtime registration of singletons. As a consequence, a registry
      * implementation should synchronize singleton access; it will have to do
      * this anyway if it supports a BeanFactory's lazy initialization of singletons.
+     * <p>
+     * 注册单例对象
      *
      * @param beanName        the name of the bean
      * @param singletonObject the existing singleton object
@@ -68,6 +72,7 @@ public interface SingletonBeanRegistry {
      * <p><b>NOTE:</b> This lookup method is not aware of FactoryBean prefixes or aliases.
      * You need to resolve the canonical bean name first before obtaining the singleton instance.
      *
+     * 获取一个单例对象
      * @param beanName the name of the bean to look for
      * @return the registered singleton object, or {@code null} if none found
      * @see ConfigurableListableBeanFactory#getBeanDefinition
@@ -92,6 +97,7 @@ public interface SingletonBeanRegistry {
      * <p><b>NOTE:</b> This lookup method is not aware of FactoryBean prefixes or aliases.
      * You need to resolve the canonical bean name first before checking the singleton status.
      *
+     * 是否存在单例对象
      * @param beanName the name of the bean to look for
      * @return if this bean factory contains a singleton instance with the given name
      * @see #registerSingleton
@@ -108,6 +114,8 @@ public interface SingletonBeanRegistry {
      * (see {@link #registerSingleton}). Can also be used to check which singletons
      * defined by a bean definition have already been created.
      *
+     * 获取单例 beanName
+     *
      * @return the list of names as a String array (never {@code null})
      * @see #registerSingleton
      * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#getBeanDefinitionNames
@@ -123,6 +131,7 @@ public interface SingletonBeanRegistry {
      * (see {@link #registerSingleton}). Can also be used to count the number of
      * singletons defined by a bean definition that have already been created.
      *
+     * 单例bean的数量
      * @return the number of singleton beans
      * @see #registerSingleton
      * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#getBeanDefinitionCount

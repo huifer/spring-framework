@@ -103,6 +103,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
     /**
      * Map of bean definition objects, keyed by bean name.
+     * <p>
+     * beanName -> bean 定义
      */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
     /**
@@ -111,6 +113,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
     /**
      * Map of singleton-only bean names, keyed by dependency type.
+     * 单例的bean
      */
     private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
     /**
@@ -879,7 +882,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             }
         }
 
+        // 从 beanmap 中获取 bean定义
         BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+        // 是否存在beanDefinition
         if (existingDefinition != null) {
             if (!isAllowBeanDefinitionOverriding()) {
                 throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);

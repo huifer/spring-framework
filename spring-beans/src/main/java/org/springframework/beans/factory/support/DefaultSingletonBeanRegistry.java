@@ -49,6 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link AbstractBeanFactory} and {@link DefaultListableBeanFactory}
  * (which inherit from it). Can alternatively also be used as a nested
  * helper to delegate to.
+ * <p>
+ * 默认的单例bean注册
  *
  * @author Juergen Hoeller
  * @see #registerSingleton
@@ -61,26 +63,31 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
     /**
      * Cache of singleton objects: bean name to bean instance.
+     * 单例对象的缓存: beanName -> Object
      */
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
     /**
      * Cache of singleton factories: bean name to ObjectFactory.
+     * 单例工厂的缓存: beanName -> ObjectFactory。
      */
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
     /**
      * Cache of early singleton objects: bean name to bean instance.
+     * 延迟加载的单例对象缓存: beanName -> Object
      */
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
     /**
      * Set of registered singletons, containing the bean names in registration order.
+     * 已经注册过的单例对象名称(beanName)
      */
     private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
     /**
      * Names of beans that are currently in creation.
+     * 当前正在创建的单例对象名称(beanName)
      */
     private final Set<String> singletonsCurrentlyInCreation =
             Collections.newSetFromMap(new ConcurrentHashMap<>(16));
@@ -92,6 +99,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             Collections.newSetFromMap(new ConcurrentHashMap<>(16));
     /**
      * Disposable bean instances: bean name to disposable instance.
+     * 一次性的bean
      */
     private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
     /**
@@ -100,32 +108,47 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
     private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
     /**
      * Map between dependent bean names: bean name to Set of dependent bean names.
+     *
+     * bean 和beanName的关系
      */
     private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
     /**
      * Map between depending bean names: bean name to Set of bean names for the bean's dependencies.
+     * bean 依赖关系 beanName -> 依赖关系
      */
     private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
     /**
      * List of suppressed Exceptions, available for associating related causes.
+     * 异常列表
      */
     @Nullable
     private Set<Exception> suppressedExceptions;
     /**
      * Flag that indicates whether we're currently within destroySingletons.
+     * 标记是否在 destroySingletons 上
      */
     private boolean singletonsCurrentlyInDestruction = false;
 
+    /**
+     * 注册一个单例对象
+     *
+     * @param beanName        the name of the bean
+     * @param singletonObject the existing singleton object
+     * @throws IllegalStateException
+     */
     @Override
     public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
         Assert.notNull(beanName, "Bean name must not be null");
         Assert.notNull(singletonObject, "Singleton object must not be null");
         synchronized (this.singletonObjects) {
+            // 通过beanName获取单例对象
             Object oldObject = this.singletonObjects.get(beanName);
+            // 不为空异常
             if (oldObject != null) {
                 throw new IllegalStateException("Could not register object [" + singletonObject +
                         "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
             }
+            // 添加方法
             addSingleton(beanName, singletonObject);
         }
     }
@@ -134,6 +157,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
      * Add the given singleton object to the singleton cache of this factory.
      * <p>To be called for eager registration of singletons.
      *
+     * 添加单例对象的操作方法
      * @param beanName        the name of the bean
      * @param singletonObject the singleton object
      */
@@ -177,6 +201,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
      * <p>Checks already instantiated singletons and also allows for an early
      * reference to a currently created singleton (resolving a circular reference).
      *
+     * 获取单例对象
      * @param beanName            the name of the bean to look for
      * @param allowEarlyReference whether early references should be created or not
      * @return the registered singleton object, or {@code null} if none found
@@ -292,6 +317,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         }
     }
 
+    /**
+     * 通过map的key是否存在判断
+     * @param beanName the name of the bean to look for
+     * @return
+     */
     @Override
     public boolean containsSingleton(String beanName) {
         return this.singletonObjects.containsKey(beanName);

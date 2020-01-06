@@ -199,6 +199,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
      * Load bean definitions from the specified properties file,
      * using all property keys (i.e. not filtering by prefix).
      *
+     * 加载bean定义文件
      * @param resource the resource descriptor for the properties file
      * @return the number of bean definitions found
      * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -262,6 +263,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
                 }
             }
 
+            // 获取bean的定义数量
             int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
@@ -391,7 +393,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
                     }
                     if (!getRegistry().containsBeanDefinition(beanName)) {
                         // If we haven't already registered it...
+                        // bean 注册
                         registerBeanDefinition(beanName, map, prefix + beanName, resourceDescription);
+                        // bean累加数量
                         ++beanCount;
                     }
                 }
@@ -422,8 +426,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
     protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
             throws BeansException {
 
+        // 类名
         String className = null;
+        // 父级
         String parent = null;
+        // 默认作用域
         String scope = GenericBeanDefinition.SCOPE_SINGLETON;
         boolean isAbstract = false;
         boolean lazyInit = false;
@@ -434,11 +441,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             String key = StringUtils.trimWhitespace((String) entry.getKey());
             if (key.startsWith(prefix + SEPARATOR)) {
+                // 截取key
                 String property = key.substring(prefix.length() + SEPARATOR.length());
                 if (CLASS_KEY.equals(property)) {
+                    // 设置className
                     className = StringUtils.trimWhitespace((String) entry.getValue());
                 }
                 else if (PARENT_KEY.equals(property)) {
+                    // 设置父级
                     parent = StringUtils.trimWhitespace((String) entry.getValue());
                 }
                 else if (ABSTRACT_KEY.equals(property)) {

@@ -328,9 +328,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
      * Register bean definitions contained in a Map.
      * Ignore ineligible properties.
      *
+     * 注册bean定义
      * @param map    a map of {@code name} to {@code property} (String or Object). Property
      *               values will be strings if coming from a Properties file etc. Property names
      *               (keys) <b>must</b> be Strings. Class keys must be Strings.
+     *
      * @param prefix a filter within the keys in the map: e.g. 'beans.'
      *               (can be empty or {@code null})
      * @return the number of bean definitions found
@@ -347,8 +349,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
      * @param map                 a map of {@code name} to {@code property} (String or Object). Property
      *                            values will be strings if coming from a Properties file etc. Property names
      *                            (keys) <b>must</b> be Strings. Class keys must be Strings.
+     *                            key是beanName value是class
      * @param prefix              a filter within the keys in the map: e.g. 'beans.'
      *                            (can be empty or {@code null})
+     *                            前缀
      * @param resourceDescription description of the resource that the
      *                            Map came from (for logging purposes)
      * @return the number of bean definitions found

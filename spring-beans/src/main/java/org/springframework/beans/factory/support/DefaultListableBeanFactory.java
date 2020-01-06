@@ -140,6 +140,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
     /**
      * List of bean definition names, in registration order.
+     * beanName 列表
      */
     private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
 
@@ -466,6 +467,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return getBeanNamesForType(type, true, true);
     }
 
+    /**
+     * 根据获取beanName
+     * @param type                 the class or interface to match, or {@code null} for all bean names
+     *                              bean类型
+     * @param includeNonSingletons whether to include prototype or scoped beans too
+     *                             or just singletons (also applies to FactoryBeans)
+     *                             bean 作用域
+     * @param allowEagerInit       whether to initialize <i>lazy-init singletons</i> and
+     *                             <i>objects created by FactoryBeans</i> (or by factory methods with a
+     *                             "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+     *                             eagerly initialized to determine their type: So be aware that passing in "true"
+     *                             for this flag will initialize FactoryBeans and "factory-bean" references.
+     * @return
+     */
     @Override
     public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
         if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
@@ -491,6 +506,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         for (String beanName : this.beanDefinitionNames) {
             // Only consider bean as eligible if the bean name
             // is not defined as alias for some other bean.
+            // 判断是否是别名
             if (!isAlias(beanName)) {
                 try {
                     RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);

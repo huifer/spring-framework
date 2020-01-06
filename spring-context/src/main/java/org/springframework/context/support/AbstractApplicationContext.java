@@ -538,12 +538,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
             // Prepare the bean factory for use in this context.
             // 准备beanFactory 对下文使用
-            // todo: 2020/1/1 下一个解析目标
             prepareBeanFactory(beanFactory);
 
             try {
                 // Allows post-processing of the bean factory in context subclasses.
                 // 创建后置工厂 beanFactory 后置工厂
+                // 空实现
                 postProcessBeanFactory(beanFactory);
 
                 // Invoke factory processors registered as beans in the context.
@@ -684,12 +684,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      */
     protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         // Tell the internal bean factory to use the context's class loader etc.
+        // 设置 类加载器,作为当前context的classLoader
         beanFactory.setBeanClassLoader(getClassLoader());
+        // Spring EL 表达式工具
         beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+        // 属性编辑器 PropertyEditorRegistrar
         beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
         // Configure the bean factory with context callbacks.
+        // 添加后置处理器
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        // 添加忽略的自动装配
         beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
         beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
         beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -699,6 +704,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
         // BeanFactory interface not registered as resolvable type in a plain factory.
         // MessageSource registered (and found for autowiring) as a bean.
+        //
         beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
         beanFactory.registerResolvableDependency(ResourceLoader.class, this);
         beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
@@ -715,6 +721,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
         }
 
         // Register default environment beans.
+        // 添加系统级别的bean对象
         if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
             beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
         }

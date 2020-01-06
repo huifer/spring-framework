@@ -57,13 +57,14 @@ final class PostProcessorRegistrationDelegate {
 
         // Invoke BeanDefinitionRegistryPostProcessors first, if any.
         Set<String> processedBeans = new HashSet<>();
-
+        // 判断是否为BeanDefinitionRegistry类
         if (beanFactory instanceof BeanDefinitionRegistry) {
             BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
             List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
             List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
             for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
+                // 判断是否是BeanDefinitionRegistryPostProcessor
                 if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
                     BeanDefinitionRegistryPostProcessor registryProcessor =
                             (BeanDefinitionRegistryPostProcessor) postProcessor;

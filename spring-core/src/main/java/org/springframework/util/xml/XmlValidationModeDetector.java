@@ -24,6 +24,8 @@ import java.io.*;
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
  *
+ *
+ * xml 校验方法
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -92,14 +94,19 @@ public class XmlValidationModeDetector {
             boolean isDtdValidated = false;
             String content;
             while ((content = reader.readLine()) != null) {
+                    // 获取数据
                 content = consumeCommentTokens(content);
+
+                // 空，或者注释跳过
                 if (this.inComment || !StringUtils.hasText(content)) {
                     continue;
                 }
+                // 是否有 DOCTYPE 内容
                 if (hasDoctype(content)) {
                     isDtdValidated = true;
                     break;
                 }
+                // 是不是 标签开始 判断为<符号
                 if (hasOpeningTag(content)) {
                     // End of meaningful data...
                     break;
@@ -129,6 +136,8 @@ public class XmlValidationModeDetector {
      * Does the supplied content contain an XML opening tag. If the parse state is currently
      * in an XML comment then this method always returns false. It is expected that all comment
      * tokens will have consumed for the supplied content before passing the remainder to this method.
+     *
+     * 是否为tag标签 判断{@code <}开头
      */
     private boolean hasOpeningTag(String content) {
         if (this.inComment) {

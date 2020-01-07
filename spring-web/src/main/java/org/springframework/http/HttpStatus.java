@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>The HTTP status code series can be retrieved via {@link #series()}.
  *
+ * http 状态码
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel

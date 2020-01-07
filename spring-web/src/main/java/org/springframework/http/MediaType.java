@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
  * A subclass of {@link MimeType} that adds support for quality parameters
  * as defined in the HTTP specification.
  *
+ *
+ * http 媒体类型
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

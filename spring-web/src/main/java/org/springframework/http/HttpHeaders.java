@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
  *
  * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
  *
+ * HttpHeaders,该类将http头信息全部列举
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel

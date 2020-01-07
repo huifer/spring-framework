@@ -64,6 +64,8 @@ import java.util.Set;
  * }
  * </pre>
  *
+ *
+ * 请求返回对象
  * @param <T> the body type
  * @author Arjen Poutsma
  * @author Brian Clozel

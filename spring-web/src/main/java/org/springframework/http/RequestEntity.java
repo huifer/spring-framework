@@ -59,6 +59,8 @@ import java.util.Arrays;
  * }
  * </pre>
  *
+ *
+ * 请求对象
  * @param <T> the body type
  * @author Arjen Poutsma
  * @author Sebastien Deleuze

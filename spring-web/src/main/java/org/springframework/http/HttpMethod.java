@@ -26,6 +26,7 @@ import java.util.Map;
  * with {@link org.springframework.http.client.ClientHttpRequest}
  * and {@link org.springframework.web.client.RestTemplate}.
  *
+ * http 请求方式枚举
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0

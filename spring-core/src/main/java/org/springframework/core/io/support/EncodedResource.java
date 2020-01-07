@@ -85,6 +85,12 @@ public class EncodedResource implements InputStreamSource {
         this(resource, null, charset);
     }
 
+    /**
+     *
+     * @param resource 资源
+     * @param encoding 编码
+     * @param charset 编码
+     */
     private EncodedResource(Resource resource, @Nullable String encoding, @Nullable Charset charset) {
         super();
         Assert.notNull(resource, "Resource must not be null");
@@ -136,6 +142,7 @@ public class EncodedResource implements InputStreamSource {
      * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}
      * (if any).
      *
+     * 获取reader返回不同编码的解析
      * @throws IOException if opening the Reader failed
      * @see #requiresReader()
      * @see #getInputStream()

@@ -32,6 +32,8 @@ import org.springframework.util.ResourceUtils;
  * from Strings when running in an ApplicationContext, using the particular
  * context's resource loading strategy.
  *
+ *
+ * 资源加载器
  * @author Juergen Hoeller
  * @see Resource
  * @see org.springframework.core.io.support.ResourcePatternResolver

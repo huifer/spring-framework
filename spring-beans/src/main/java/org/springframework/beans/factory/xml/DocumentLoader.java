@@ -32,6 +32,10 @@ public interface DocumentLoader {
 
     /**
      * Load a {@link Document document} from the supplied {@link InputSource source}.
+     * <p>
+     * <p>
+     * 加载文件,通过 {@link InputSource } 加载
+     * 实现类{@link DefaultDocumentLoader#loadDocument(org.xml.sax.InputSource, org.xml.sax.EntityResolver, org.xml.sax.ErrorHandler, int, boolean)}
      *
      * @param inputSource    the source of the document that is to be loaded
      * @param entityResolver the resolver that is to be used to resolve any entities

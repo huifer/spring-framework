@@ -277,6 +277,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      */
     @Override
     public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+        // 通过 EncodedResource 封装一次
         return loadBeanDefinitions(new EncodedResource(resource));
     }
 
@@ -313,6 +314,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
              */
             InputStream inputStream = encodedResource.getResource().getInputStream();
             try {
+                // InputSource 不是 Spring 的
                 InputSource inputSource = new InputSource(inputStream);
                 if (encodedResource.getEncoding() != null) {
                     inputSource.setEncoding(encodedResource.getEncoding());
@@ -321,6 +323,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                 return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
             }
             finally {
+                // 关闭输入流
                 inputStream.close();
             }
         }
@@ -377,8 +380,19 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
             throws BeanDefinitionStoreException {
 
+        /**
+         * 下面 try 代码块中逻辑
+         * doLoadDocument()
+         *  1. 验证xml模式, 方法getValidationModeForResource()
+         *      1. 自动验证 detectValidationMode()
+         *  2. 加载xml, 方法loadDocument()
+         * registerBeanDefinitions()
+         *  1. 注册bean
+         *  2. 返回bean数量
+         */
         try {
             // 加载文档 xml 格式
+            // 在内部有验证xml
             Document doc = doLoadDocument(inputSource, resource);
             // 注册bean
             int count = registerBeanDefinitions(doc, resource);
@@ -415,6 +429,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     /**
      * Actually load the specified document using the configured DocumentLoader.
      *
+     * 做的内容
+     * 1. 验证xml是否合法
+     * 2. 加载 Document
      * @param inputSource the SAX InputSource to read from
      *                    输入流
      * @param resource    the resource descriptor for the XML file
@@ -425,6 +442,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * @see DocumentLoader#loadDocument
      */
     protected Document doLoadDocument(InputSource inputSource, Resource resource) throws Exception {
+        // loadDocument加载xml
+        // getValidationModeForResource 验证xml
         return this.documentLoader.loadDocument(inputSource, getEntityResolver(), this.errorHandler,
                 getValidationModeForResource(resource), isNamespaceAware());
     }
@@ -435,14 +454,18 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * mode gets {@link #detectValidationMode detected} from the given resource.
      * <p>Override this method if you would like full control over the validation
      * mode, even when something other than {@link #VALIDATION_AUTO} was set.
+     * <p>
+     * 获取验证模式
      *
      * @see #detectValidationMode
      */
     protected int getValidationModeForResource(Resource resource) {
         int validationModeToUse = getValidationMode();
+        // 手动指定验证模式
         if (validationModeToUse != VALIDATION_AUTO) {
             return validationModeToUse;
         }
+        // 自动验证模式
         int detectedMode = detectValidationMode(resource);
         if (detectedMode != VALIDATION_AUTO) {
             return detectedMode;
@@ -459,6 +482,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * definition then DTD validation is used otherwise XSD validation is assumed.
      * <p>Override this method if you would like to customize resolution
      * of the {@link #VALIDATION_AUTO} mode.
+     *
+     * 自动验证xml模式
      */
     protected int detectValidationMode(Resource resource) {
         if (resource.isOpen()) {
@@ -481,6 +506,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         }
 
         try {
+            // 真正的xml校验方法
             return this.validationModeDetector.detectValidationMode(inputStream);
         }
         catch (IOException ex) {
@@ -494,6 +520,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
      * Called by {@code loadBeanDefinitions}.
      * <p>Creates a new instance of the parser class and invokes
      * {@code registerBeanDefinitions} on it.
+     * <p>
+     * 注册bean 返回bean数量
      *
      * @param doc      the DOM document
      * @param resource the resource descriptor (for context information)

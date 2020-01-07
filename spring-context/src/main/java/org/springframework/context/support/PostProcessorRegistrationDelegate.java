@@ -60,18 +60,26 @@ final class PostProcessorRegistrationDelegate {
         // 判断是否为BeanDefinitionRegistry类
         if (beanFactory instanceof BeanDefinitionRegistry) {
             BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+            // 存放 BeanFactoryPostProcessor
             List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
+            // 存放 BeanDefinitionRegistryPostProcessor
             List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
+            // 2.首先处理入参中的beanFactoryPostProcessors
             for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
                 // 判断是否是BeanDefinitionRegistryPostProcessor
                 if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
                     BeanDefinitionRegistryPostProcessor registryProcessor =
                             (BeanDefinitionRegistryPostProcessor) postProcessor;
+                    //
                     registryProcessor.postProcessBeanDefinitionRegistry(registry);
+                    // BeanDefinitionRegistryPostProcessor 添加
+                    // 执行 postProcessBeanFactory
                     registryProcessors.add(registryProcessor);
                 }
+                // 这部分else 内容就是 BeanFactoryPostProcessor
                 else {
+                    // BeanFactoryPostProcessor 添加
                     regularPostProcessors.add(postProcessor);
                 }
             }

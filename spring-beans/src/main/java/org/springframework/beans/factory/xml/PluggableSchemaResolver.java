@@ -116,14 +116,18 @@ public class PluggableSchemaResolver implements EntityResolver {
         }
 
         if (systemId != null) {
+            // 获取当前 systemId 对应的资源
+            // spring-framework\spring-beans\src\main\resources\org\springframework\beans\factory\xml\spring-beans.xsd
             String resourceLocation = getSchemaMappings().get(systemId);
             if (resourceLocation == null && systemId.startsWith("https:")) {
                 // Retrieve canonical http schema mapping even for https declaration
                 resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
             }
             if (resourceLocation != null) {
+                // 加载 resourceLocation 转换成 Resource
                 Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
                 try {
+                    // 读取
                     InputSource source = new InputSource(resource.getInputStream());
                     source.setPublicId(publicId);
                     source.setSystemId(systemId);
@@ -146,6 +150,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 
     /**
      * Load the specified schema mappings lazily.
+     * 加载本地的资源
      */
     private Map<String, String> getSchemaMappings() {
         Map<String, String> schemaMappings = this.schemaMappings;

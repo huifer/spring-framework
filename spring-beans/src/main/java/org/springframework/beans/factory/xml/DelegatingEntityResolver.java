@@ -88,9 +88,19 @@ public class DelegatingEntityResolver implements EntityResolver {
             throws SAXException, IOException {
 
         if (systemId != null) {
+            // 判断是否为 .dtd结束
+            /**
+             *{@link BeansDtdResolver#resolveEntity(java.lang.String, java.lang.String)}
+             */
             if (systemId.endsWith(DTD_SUFFIX)) {
                 return this.dtdResolver.resolveEntity(publicId, systemId);
             }
+            // 判断是否为 .xsd结束
+            /**
+             * {@link  PluggableSchemaResolver#resolveEntity(java.lang.String, java.lang.String)}
+             * \spring-framework\spring-beans\src\main\resources\META-INF\spring.schemas
+             *
+             */
             else if (systemId.endsWith(XSD_SUFFIX)) {
                 return this.schemaResolver.resolveEntity(publicId, systemId);
             }

@@ -1438,6 +1438,8 @@ public class BeanDefinitionParserDelegate {
      */
     @Nullable
     public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+
+        // todo: 2020/1/8 自定义标签解析
         String namespaceUri = getNamespaceURI(ele);
         if (namespaceUri == null) {
             return null;
@@ -1447,6 +1449,7 @@ public class BeanDefinitionParserDelegate {
             error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
             return null;
         }
+        // 自定义处理器
         return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
     }
 

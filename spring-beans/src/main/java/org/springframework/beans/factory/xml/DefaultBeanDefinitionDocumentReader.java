@@ -364,6 +364,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
      * 加载信息并且注册
      */
     protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+        // 元素解析
         BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
         if (bdHolder != null) {
             bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);

@@ -503,9 +503,11 @@ public class BeanDefinitionParserDelegate {
     public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String beanName,
                                                                 @Nullable BeanDefinition containingBean, AbstractBeanDefinition bd) {
 
+        // 判断是否存在singleton属性
         if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
             error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
         }
+        // 判断是否存在 scope 属性
         else if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
             bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
         }
@@ -514,10 +516,12 @@ public class BeanDefinitionParserDelegate {
             bd.setScope(containingBean.getScope());
         }
 
+        // 判断是否存在 abstract
         if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
             bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
         }
 
+        // 获取 lazy-init 属性
         String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
         if (isDefaultValue(lazyInit)) {
             lazyInit = this.defaults.getLazyInit();
@@ -583,12 +587,13 @@ public class BeanDefinitionParserDelegate {
      *                   bean的类全名
      * @param parentName the name of the bean's parent bean
      *                   父类的名称
-     * @return the newly created bean definition, 新的对象
+     * @return the newly created bean definition, 新的对象{@link GenericBeanDefinition}
      * @throws ClassNotFoundException if bean class resolution was attempted but failed
      */
     protected AbstractBeanDefinition createBeanDefinition(@Nullable String className, @Nullable String parentName)
             throws ClassNotFoundException {
 
+        //  创建 GenericBeanDefinition
         return BeanDefinitionReaderUtils.createBeanDefinition(
                 parentName, className, this.readerContext.getBeanClassLoader());
     }
@@ -716,7 +721,9 @@ public class BeanDefinitionParserDelegate {
             Node node = nl.item(i);
             if (isCandidateElement(node) && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
                 Element replacedMethodEle = (Element) node;
+                // 老的方法
                 String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
+                // 新的方法
                 String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
                 // 转换成JAVA对象
                 ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
@@ -724,6 +731,7 @@ public class BeanDefinitionParserDelegate {
                 // 参数解析 <arg-type match=""> 解析
                 List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
                 for (Element argTypeEle : argTypeEles) {
+                    // 参数记录
                     String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
                     match = (StringUtils.hasText(match) ? match : DomUtils.getTextValue(argTypeEle));
                     if (StringUtils.hasText(match)) {
@@ -887,6 +895,7 @@ public class BeanDefinitionParserDelegate {
      */
     @Nullable
     public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
+        // 节点名称组装
         String elementName = (propertyName != null ?
                 "<property> element for property '" + propertyName + "'" :
                 "<constructor-arg> element");
@@ -932,6 +941,7 @@ public class BeanDefinitionParserDelegate {
         }
         // 判断3: 存在 value 返回 value 的值
         else if (hasValueAttribute) {
+            // value 解析实体
             TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
             valueHolder.setSource(extractSource(ele));
             return valueHolder;
@@ -941,7 +951,7 @@ public class BeanDefinitionParserDelegate {
             return parsePropertySubElement(subElement, bd);
         }
         else {
-            // 没有抛出异常
+            // 没有 ref和value 抛出异常
             // Neither child element nor "ref" or "value" attribute found.
             error(elementName + " must specify a ref or value", ele);
             return null;
@@ -971,10 +981,12 @@ public class BeanDefinitionParserDelegate {
      */
     @Nullable
     public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, @Nullable String defaultValueType) {
+        // 判断是否是默认命名空间
         if (!isDefaultNamespace(ele)) {
             return parseNestedCustomElement(ele, bd);
         }
         else if (nodeNameEquals(ele, BEAN_ELEMENT)) {
+            // 解析 bean
             BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
             if (nestedBd != null) {
                 nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
@@ -983,6 +995,7 @@ public class BeanDefinitionParserDelegate {
         }
         else if (nodeNameEquals(ele, REF_ELEMENT)) {
             // A generic reference to any name of any bean.
+            // 获取ref 属性值
             String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
             boolean toParent = false;
             if (!StringUtils.hasLength(refName)) {
@@ -1002,12 +1015,15 @@ public class BeanDefinitionParserDelegate {
             ref.setSource(extractSource(ele));
             return ref;
         }
+        // 解析 idref标签
         else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
             return parseIdRefElement(ele);
         }
+        // 解析 value 标签
         else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
             return parseValueElement(ele, defaultValueType);
         }
+        // 解析 null
         else if (nodeNameEquals(ele, NULL_ELEMENT)) {
             // It's a distinguished null value. Let's wrap it in a TypedStringValue
             // object in order to preserve the source location.
@@ -1015,18 +1031,23 @@ public class BeanDefinitionParserDelegate {
             nullHolder.setSource(extractSource(ele));
             return nullHolder;
         }
+        // 解析 array
         else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
             return parseArrayElement(ele, bd);
         }
+        // 解析 list
         else if (nodeNameEquals(ele, LIST_ELEMENT)) {
             return parseListElement(ele, bd);
         }
+        //  解析 set
         else if (nodeNameEquals(ele, SET_ELEMENT)) {
             return parseSetElement(ele, bd);
         }
+        // 解析 map
         else if (nodeNameEquals(ele, MAP_ELEMENT)) {
             return parseMapElement(ele, bd);
         }
+        // 解析 props
         else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
             return parsePropsElement(ele);
         }
@@ -1118,14 +1139,26 @@ public class BeanDefinitionParserDelegate {
 
     /**
      * Parse a list element.
+     * {@code
+     * <bean name="obj" class="com.huifer.source.spring.bean.JavaObjectTest">
+     * <constructor-arg>
+     * <list value-type="java.lang.String">
+     * <value>jasl</value>
+     * <value>acg</value>
+     * </list>
+     * </constructor-arg>
+     * </bean>
+     * }
      */
     public List<Object> parseListElement(Element collectionEle, @Nullable BeanDefinition bd) {
+        // 获取 value-type 标签数据
         String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
         NodeList nl = collectionEle.getChildNodes();
         ManagedList<Object> target = new ManagedList<>(nl.getLength());
         target.setSource(extractSource(collectionEle));
         target.setElementTypeName(defaultElementType);
         target.setMergeEnabled(parseMergeAttribute(collectionEle));
+        // 解析集合标签
         parseCollectionElements(nl, target, bd, defaultElementType);
         return target;
     }
@@ -1144,6 +1177,15 @@ public class BeanDefinitionParserDelegate {
         return target;
     }
 
+
+    /**
+     * 解析 集合元素
+     *
+     * @param elementNodes
+     * @param target
+     * @param bd
+     * @param defaultElementType
+     */
     protected void parseCollectionElements(
             NodeList elementNodes, Collection<Object> target, @Nullable BeanDefinition bd, String defaultElementType) {
 
@@ -1156,12 +1198,23 @@ public class BeanDefinitionParserDelegate {
     }
 
     /**
+     * {@code
+     * <bean name="obj2" class="com.huifer.source.spring.bean.JavaObjectTest">
+     * <constructor-arg>
+     * <map>
+     * <entry value-type="java.lang.String" key="h" value="k"/>
+     * </map>
+     * </constructor-arg>
+     * </bean>
+     * }
      * Parse a map element.
      */
     public Map<Object, Object> parseMapElement(Element mapEle, @Nullable BeanDefinition bd) {
+        // 获取  key-type 属性
         String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+        //  获取 value-type 属性
         String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
-
+        // 获取 map 下级标签
         List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
         ManagedMap<Object, Object> map = new ManagedMap<>(entryEles.size());
         map.setSource(extractSource(mapEle));
@@ -1204,7 +1257,9 @@ public class BeanDefinitionParserDelegate {
 
             // Extract key from attribute or sub-element.
             Object key = null;
+            // 是否存在 key 属性
             boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
+            // 是否存在 key-ref 属性
             boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
             if ((hasKeyAttribute && hasKeyRefAttribute) ||
                     (hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
@@ -1212,9 +1267,11 @@ public class BeanDefinitionParserDelegate {
                         "a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
             }
             if (hasKeyAttribute) {
+                // 获取 key 值
                 key = buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyType, entryEle);
             }
             else if (hasKeyRefAttribute) {
+                // 获取 key-ref 属性值
                 String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
                 if (!StringUtils.hasText(refName)) {
                     error("<entry> element contains empty 'key-ref' attribute", entryEle);
@@ -1232,8 +1289,11 @@ public class BeanDefinitionParserDelegate {
 
             // Extract value from attribute or sub-element.
             Object value = null;
+            // 是否存在 value 标签
             boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
+            // 是否存在 value-ref 标签
             boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
+            // 是否存在 value-type 标签
             boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
             if ((hasValueAttribute && hasValueRefAttribute) ||
                     (hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
@@ -1247,13 +1307,16 @@ public class BeanDefinitionParserDelegate {
                         "attribute when it has a 'value' attribute", entryEle);
             }
             if (hasValueAttribute) {
+                //   获取 value-type值
                 String valueType = entryEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
                 if (!StringUtils.hasText(valueType)) {
                     valueType = defaultValueType;
                 }
+                // 构造value
                 value = buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE), valueType, entryEle);
             }
             else if (hasValueRefAttribute) {
+                //  获取 value-ref 属性值
                 String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
                 if (!StringUtils.hasText(refName)) {
                     error("<entry> element contains empty 'value-ref' attribute", entryEle);
@@ -1263,6 +1326,7 @@ public class BeanDefinitionParserDelegate {
                 value = ref;
             }
             else if (valueEle != null) {
+                // 继续解析下级标签
                 value = parsePropertySubElement(valueEle, bd, defaultValueType);
             }
             else {
@@ -1270,6 +1334,7 @@ public class BeanDefinitionParserDelegate {
             }
 
             // Add final key and value to the Map.
+            //  设置 map 值
             map.put(key, value);
         }
 

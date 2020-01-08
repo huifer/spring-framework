@@ -40,6 +40,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.servlet.config.MvcNamespaceHandler;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
@@ -541,8 +542,14 @@ public class DispatcherServlet extends FrameworkServlet {
     /**
      * Initialize the strategy objects that this servlet uses.
      * <p>May be overridden in subclasses in order to initialize further strategy objects.
+     * <p>
+     * <p>
+     * 組件初始化
+     * {@link MvcNamespaceHandler#init()}
      */
     protected void initStrategies(ApplicationContext context) {
+        // 这里的init方法基本思想相同
+        // 1. 从context 获取 beanName,beanClass
         initMultipartResolver(context);
         initLocaleResolver(context);
         initThemeResolver(context);

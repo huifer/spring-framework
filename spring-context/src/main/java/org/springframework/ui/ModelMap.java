@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
  * <p>This class serves as generic model holder for Servlet MVC but is not tied to it.
  * Check out the {@link Model} interface for an interface variant.
  *
+ *
+ * map对象存放内容: key: 属性值名称, value: 属性值
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @see Conventions#getVariableName

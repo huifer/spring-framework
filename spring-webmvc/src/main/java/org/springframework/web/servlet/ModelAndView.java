@@ -34,6 +34,9 @@ import java.util.Map;
  * view name which will need to be resolved by a ViewResolver object;
  * alternatively a View object can be specified directly. The model
  * is a Map, allowing the use of multiple objects keyed by name.
+ * <p>
+ * <p>
+ * 数据和视图
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -48,6 +51,7 @@ public class ModelAndView {
 
     /**
      * View instance or view name String.
+     * 视图
      */
     @Nullable
     private Object view;
@@ -209,6 +213,8 @@ public class ModelAndView {
      * Set a view name for this ModelAndView, to be resolved by the
      * DispatcherServlet via a ViewResolver. Will override any
      * pre-existing view name or View.
+     * <p>
+     * 设置视图名称
      */
     public void setViewName(@Nullable String viewName) {
         this.view = viewName;
@@ -297,9 +303,13 @@ public class ModelAndView {
 
     /**
      * Add an attribute to the model.
+     * <p>
+     * 添加属性值和数据
      *
      * @param attributeName  name of the object to add to the model (never {@code null})
+     *                       属性值名称
      * @param attributeValue object to add to the model (can be {@code null})
+     *                       属性值
      * @see ModelMap#addAttribute(String, Object)
      * @see #getModelMap()
      */

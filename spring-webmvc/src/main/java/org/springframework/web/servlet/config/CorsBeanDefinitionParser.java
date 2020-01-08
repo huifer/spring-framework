@@ -35,6 +35,8 @@ import java.util.Map;
  * {@code cors} element in order to set the CORS configuration in the various
  * {AbstractHandlerMapping} beans created by {@link AnnotationDrivenBeanDefinitionParser},
  * {@link ResourcesBeanDefinitionParser} and {@link ViewControllerBeanDefinitionParser}.
+ * <p>
+ * 跨域bean
  *
  * @author Sebastien Deleuze
  * @since 4.2
@@ -49,11 +51,15 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
         List<Element> mappings = DomUtils.getChildElementsByTagName(element, "mapping");
 
         if (mappings.isEmpty()) {
+            // 最简配置
             CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
             corsConfigurations.put("/**", config);
         }
         else {
+            // 单个 mapping 处理
+            // mvc:mapping 标签
             for (Element mapping : mappings) {
+                // 跨域配置
                 CorsConfiguration config = new CorsConfiguration();
                 if (mapping.hasAttribute("allowed-origins")) {
                     String[] allowedOrigins = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-origins"), ",");
@@ -81,6 +87,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
             }
         }
 
+        // 注册到 Spring
         MvcNamespaceUtils.registerCorsConfigurations(
                 corsConfigurations, parserContext, parserContext.extractSource(element));
         return null;

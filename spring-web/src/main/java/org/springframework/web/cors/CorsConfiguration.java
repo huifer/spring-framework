@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
  * initialization model to start with open defaults that permit all cross-origin
  * requests for GET, HEAD, and POST requests.
  *
+ * 跨域配置类
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -59,24 +60,45 @@ public class CorsConfiguration {
             Collections.singletonList(ALL));
 
 
+    /**
+     * 允许请求源
+     */
     @Nullable
     private List<String> allowedOrigins;
 
+    /**
+     * 允许的http方法
+     */
     @Nullable
     private List<String> allowedMethods;
 
+    /**
+     *
+     */
     @Nullable
     private List<HttpMethod> resolvedMethods = DEFAULT_METHODS;
 
+    /**
+     * 允许的请求头
+     */
     @Nullable
     private List<String> allowedHeaders;
 
+    /**
+     * 返回的响应头
+     */
     @Nullable
     private List<String> exposedHeaders;
 
+    /**
+     * 是否允许携带 cookies
+     */
     @Nullable
     private Boolean allowCredentials;
 
+    /**
+     * 存货有效期
+     */
     @Nullable
     private Long maxAge;
 

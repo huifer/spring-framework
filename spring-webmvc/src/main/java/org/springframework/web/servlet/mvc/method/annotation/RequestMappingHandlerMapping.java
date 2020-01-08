@@ -347,10 +347,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
         return new RequestMatchResult(patterns.iterator().next(), lookupPath, getPathMatcher());
     }
 
+    /**
+     * {@link CrossOrigin} 注解解析,跨域请求
+     * @param handler
+     * @param method
+     * @param mappingInfo
+     * @return
+     */
     @Override
     protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
         HandlerMethod handlerMethod = createHandlerMethod(handler, method);
         Class<?> beanType = handlerMethod.getBeanType();
+
         CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(beanType, CrossOrigin.class);
         CrossOrigin methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
 

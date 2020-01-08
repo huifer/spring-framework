@@ -43,6 +43,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
      * Scope identifier for the standard singleton scope: "singleton".
      * <p>Note that extended bean factories might support further scopes.
      *
+     * 作用域,单例
      * @see #setScope
      */
     String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
@@ -51,6 +52,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
      * Scope identifier for the standard prototype scope: "prototype".
      * <p>Note that extended bean factories might support further scopes.
      *
+     * 作用域,prototype
      * @see #setScope
      */
     String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;

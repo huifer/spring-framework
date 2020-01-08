@@ -93,6 +93,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
                     }
                 }
                 // 别名环检查
+                // 第一条依赖:A-B,第二条依赖:A-C-B 抛出异常
                 checkForAliasCircle(name, alias);
                 // 放入 map 对象中 alias-> name
                 this.aliasMap.put(alias, name);

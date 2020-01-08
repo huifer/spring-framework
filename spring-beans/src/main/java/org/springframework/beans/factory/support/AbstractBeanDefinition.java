@@ -150,11 +150,24 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
      */
     @Nullable
     private volatile Object beanClass;
+    /**
+     * bean 的作用域
+     */
     @Nullable
     private String scope = SCOPE_DEFAULT;
+    /**
+     * 是否抽象
+     */
     private boolean abstractFlag = false;
+    /**
+     * 是否懒加载
+     */
     private boolean lazyInit = false;
+    /**
+     * 自动注入模式
+     */
     private int autowireMode = AUTOWIRE_NO;
+
     private int dependencyCheck = DEPENDENCY_CHECK_NONE;
     @Nullable
     private String[] dependsOn;
@@ -1096,6 +1109,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
      * @throws BeanDefinitionValidationException in case of validation failure
      */
     public void validate() throws BeanDefinitionValidationException {
+        // 是否重载
+        // 是否有工厂方法
         if (hasMethodOverrides() && getFactoryMethodName() != null) {
             throw new BeanDefinitionValidationException(
                     "Cannot combine factory method with container-generated method overrides: " +

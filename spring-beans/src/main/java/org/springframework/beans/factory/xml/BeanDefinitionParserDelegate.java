@@ -1452,6 +1452,8 @@ public class BeanDefinitionParserDelegate {
 
     /**
      * Decorate the given bean definition through a namespace handler, if applicable.
+     * <p>
+     * 适配器
      *
      * @param ele         the current element
      * @param originalDef the current bean definition
@@ -1478,6 +1480,7 @@ public class BeanDefinitionParserDelegate {
         NamedNodeMap attributes = ele.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node node = attributes.item(i);
+            // 属性修饰
             finalDefinition = decorateIfRequired(node, finalDefinition, containingBd);
         }
 
@@ -1495,6 +1498,8 @@ public class BeanDefinitionParserDelegate {
     /**
      * Decorate the given bean definition through a namespace handler,
      * if applicable.
+     * <p>
+     * 修饰定义bean
      *
      * @param node         the current child node
      * @param originalDef  the current bean definition
@@ -1504,10 +1509,14 @@ public class BeanDefinitionParserDelegate {
     public BeanDefinitionHolder decorateIfRequired(
             Node node, BeanDefinitionHolder originalDef, @Nullable BeanDefinition containingBd) {
 
+        // 获取命名空间
         String namespaceUri = getNamespaceURI(node);
+        // isDefaultNamespace 非spring 标签
         if (namespaceUri != null && !isDefaultNamespace(namespaceUri)) {
+            // 根据命名空间找到对应的 命名空间处理器 NamespaceHandler
             NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
             if (handler != null) {
+                // 此处可以自定义处理方式
                 BeanDefinitionHolder decorated =
                         handler.decorate(node, originalDef, new ParserContext(this.readerContext, this, containingBd));
                 if (decorated != null) {

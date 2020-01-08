@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+">
     <bean name="obj" class="com.huifer.source.spring.bean.JavaObjectTest">
         <constructor-arg>
             <list value-type="java.lang.String">
@@ -18,5 +20,6 @@
             </map>
         </constructor-arg>
     </bean>
+
 
 </beans>

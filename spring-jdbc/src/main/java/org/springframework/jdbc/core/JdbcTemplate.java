@@ -904,7 +904,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         return updateCount(execute(psc, ps -> {
             try {
                 if (pss != null) {
-                    pss.setValues(ps);
+                    // 设置请求参数
+                   pss.setValues(ps);
                 }
                 int rows = ps.executeUpdate();
                 if (logger.isTraceEnabled()) {

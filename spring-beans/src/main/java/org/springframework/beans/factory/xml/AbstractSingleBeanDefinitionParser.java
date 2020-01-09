@@ -65,11 +65,13 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
         if (parentName != null) {
             builder.getRawBeanDefinition().setParentName(parentName);
         }
+        // 调用自己实现的方法 com.huifer.source.spring.parser.UserBeanDefinitionParser.getBeanClass
         Class<?> beanClass = getBeanClass(element);
         if (beanClass != null) {
             builder.getRawBeanDefinition().setBeanClass(beanClass);
         }
         else {
+            // getBeanClassName 同样也是可以在自定义的解析类中实现
             String beanClassName = getBeanClassName(element);
             if (beanClassName != null) {
                 builder.getRawBeanDefinition().setBeanClassName(beanClassName);
@@ -79,12 +81,16 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
         BeanDefinition containingBd = parserContext.getContainingBeanDefinition();
         if (containingBd != null) {
             // Inner bean definition must receive same scope as containing bean.
+            // 设置scope
             builder.setScope(containingBd.getScope());
         }
         if (parserContext.isDefaultLazyInit()) {
             // Default-lazy-init applies to custom bean definitions as well.
+            // 设置 lazy-init
             builder.setLazyInit(true);
         }
+
+        // 执行解析方法,在自定义解析类中存在com.huifer.source.spring.parser.UserBeanDefinitionParser.doParse
         doParse(element, parserContext, builder);
         return builder.getBeanDefinition();
     }

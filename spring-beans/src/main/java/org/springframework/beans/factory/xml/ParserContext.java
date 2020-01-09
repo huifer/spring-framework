@@ -115,6 +115,7 @@ public final class ParserContext {
             containingComponent.addNestedComponent(component);
         }
         else {
+            // 监听器
             this.readerContext.fireComponentRegistered(component);
         }
     }

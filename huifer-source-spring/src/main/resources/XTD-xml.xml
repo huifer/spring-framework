@@ -6,6 +6,6 @@
    http://www.huifer.com/schema/user http://www.huifer.com/schema/user.xsd
 ">
 
-    <myname:myUser id="testUserBean" userName="huifer" emailAddress="huifer97@110.com"/>
+    <myname:myUser id="testUserBean" userName="huifer" emailAddress="huifer97@163.com"/>
 
 </beans>

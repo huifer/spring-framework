@@ -535,6 +535,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
         int countBefore = getRegistry().getBeanDefinitionCount();
         // 注册方法
+        // createReaderContext 初始化HandlerMapping
         documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
         return getRegistry().getBeanDefinitionCount() - countBefore;
     }

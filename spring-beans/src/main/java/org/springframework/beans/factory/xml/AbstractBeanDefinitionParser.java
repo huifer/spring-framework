@@ -63,9 +63,13 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
     @Override
     @Nullable
     public final BeanDefinition parse(Element element, ParserContext parserContext) {
+        /**
+         * {@link AbstractSingleBeanDefinitionParser#parseInternal(org.w3c.dom.Element, org.springframework.beans.factory.xml.ParserContext)}
+         */
         AbstractBeanDefinition definition = parseInternal(element, parserContext);
         if (definition != null && !parserContext.isNested()) {
             try {
+                // 获取标签的id属性
                 String id = resolveId(element, definition, parserContext);
                 if (!StringUtils.hasText(id)) {
                     parserContext.getReaderContext().error(
@@ -74,14 +78,18 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
                 }
                 String[] aliases = null;
                 if (shouldParseNameAsAliases()) {
+                    // 获取 name 属性
                     String name = element.getAttribute(NAME_ATTRIBUTE);
                     if (StringUtils.hasLength(name)) {
                         aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
                     }
                 }
+                // 将 AbstractBeanDefinition 转换为 BeanDefinitionHolder 并注册
                 BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
+                // 注册 BeanDefinitionHolder
                 registerBeanDefinition(holder, parserContext.getRegistry());
                 if (shouldFireEvents()) {
+                    // 监听器处理
                     BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
                     postProcessComponentDefinition(componentDefinition);
                     parserContext.registerComponent(componentDefinition);
@@ -117,6 +125,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
             return parserContext.getReaderContext().generateBeanName(definition);
         }
         else {
+            // 获取标签的id属性
             String id = element.getAttribute(ID_ATTRIBUTE);
             if (!StringUtils.hasText(id) && shouldGenerateIdAsFallback()) {
                 id = parserContext.getReaderContext().generateBeanName(definition);

@@ -15,7 +15,16 @@ public class HsLogDaoImpl extends JdbcDaoSupport implements HsLogDao {
     @Override
     public List<HsLog> findAll() {
         return this.getJdbcTemplate().query("select * from hs_log", new HsLogRowMapper());
+    }
 
+    @Override
+    public void save(HsLog hsLog) {
+        this.getJdbcTemplate().update("insert into hs_log (SOURCE) values(?)"
+                , new Object[]{
+                        hsLog.getSource(),
+                      }
+
+        );
     }
 
     class HsLogRowMapper implements RowMapper<HsLog> {
@@ -25,7 +34,6 @@ public class HsLogDaoImpl extends JdbcDaoSupport implements HsLogDao {
             HsLog log = new HsLog();
             log.setId(rs.getInt("id"));
             log.setSource(rs.getString("source"));
-            log.setTarget(rs.getString("target"));
             return log;
         }
 

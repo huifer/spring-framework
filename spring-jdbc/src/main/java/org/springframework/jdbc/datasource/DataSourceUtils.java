@@ -67,6 +67,8 @@ public abstract class DataSourceUtils {
      * thread if transaction synchronization is active, e.g. when running within a
      * {@link org.springframework.transaction.jta.JtaTransactionManager JTA} transaction).
      *
+     *
+     * 获取数据库链接对象
      * @param dataSource the DataSource to obtain Connections from
      * @return a JDBC Connection from the given DataSource
      * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed

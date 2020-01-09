@@ -396,6 +396,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         try {
             stmt = con.createStatement();
             applyStatementSettings(stmt);
+            // 执行
             T result = action.doInStatement(stmt);
             handleWarnings(stmt);
             return result;
@@ -442,6 +443,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         execute(new ExecuteStatementCallback());
     }
 
+    /**
+     * @param sql the SQL query to execute
+     *            sql语句
+     * @param rse a callback that will extract all rows of results
+     *            返回对象
+     * @param <T>
+     * @return
+     * @throws DataAccessException
+     */
     @Override
     @Nullable
     public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
@@ -460,7 +470,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
             public T doInStatement(Statement stmt) throws SQLException {
                 ResultSet rs = null;
                 try {
+                    // 执行sql
                     rs = stmt.executeQuery(sql);
+                    // 1. org.springframework.jdbc.core.RowMapperResultSetExtractor.extractData
+                    // 这个方法返回值就是当前方法的返回值
                     return rse.extractData(rs);
                 }
                 finally {
@@ -635,9 +648,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
             logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
         }
 
+        // 获取连接对象
         Connection con = DataSourceUtils.getConnection(obtainDataSource());
         PreparedStatement ps = null;
         try {
+            // 设置查询参数
             ps = psc.createPreparedStatement(con);
             applyStatementSettings(ps);
             T result = action.doInPreparedStatement(ps);

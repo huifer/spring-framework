@@ -268,6 +268,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
      * @return number of beans registered
      */
     public int scan(String... basePackages) {
+
         int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
         doScan(basePackages);

@@ -96,7 +96,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
      * in the given packages, registering bean definitions for those components,
      * and automatically refreshing the context.
      *
+     * spring驱动的 启动方法
      * @param basePackages the packages to scan for component classes
+     *                      包扫描路径
      */
     public AnnotationConfigApplicationContext(String... basePackages) {
         this();

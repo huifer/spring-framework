@@ -183,7 +183,7 @@
 
 
 
-## 解析
+## 查询解析
 
 ### org.springframework.jdbc.core.JdbcTemplate
 
@@ -314,4 +314,56 @@ public void setDataSource(@Nullable DataSource dataSource) {
         return result;
     }
 ```
+
+
+
+
+
+
+
+## 插入解析
+
+```java
+@Override
+    public void save(HsLog hsLog) {
+        this.getJdbcTemplate().update("insert into hs_log (SOURCE) values(?)"
+                , new Object[]{
+                        hsLog.getSource(),
+                      }
+
+        );
+    }
+```
+
+`org.springframework.jdbc.core.JdbcTemplate#update(org.springframework.jdbc.core.PreparedStatementCreator, org.springframework.jdbc.core.PreparedStatementSetter)`
+
+```java
+    protected int update(final PreparedStatementCreator psc, @Nullable final PreparedStatementSetter pss)
+            throws DataAccessException {
+
+        logger.debug("Executing prepared SQL update");
+
+        return updateCount(execute(psc, ps -> {
+            try {
+                if (pss != null) {
+                    // 设置请求参数
+                   pss.setValues(ps);
+                }
+                int rows = ps.executeUpdate();
+                if (logger.isTraceEnabled()) {
+                    logger.trace("SQL update affected " + rows + " rows");
+                }
+                return rows;
+            }
+            finally {
+                if (pss instanceof ParameterDisposer) {
+                    ((ParameterDisposer) pss).cleanupParameters();
+                }
+            }
+        }));
+    }
+
+```
+
+
 
